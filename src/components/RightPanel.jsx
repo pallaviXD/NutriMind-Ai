@@ -1,10 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BrainCircuit, AlertTriangle, TrendingUp, PieChart as PieChartIcon } from 'lucide-react';
+import { BrainCircuit, AlertTriangle, TrendingUp, PieChart as PieChartIcon, Droplets, Scale } from 'lucide-react';
 import { LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import { useAuth } from '../context/AuthContext';
 
 const RightPanel = ({ state, isAnalyzing }) => {
   const { insights, riskLevel, charts } = state;
+  const { profile } = useAuth();
+  const [water, setWater] = useState(0);
+  const [weight, setWeight] = useState('');
+  const [weightSaved, setWeightSaved] = useState(false);
+
+  const addWater = () => setWater(w => Math.min(w + 1, 12));
+
+  const saveWeight = async () => {
+    if (!weight) return;
+    const token = localStorage.getItem('nm_token');
+    await fetch('/api/user/weight-log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ weight_kg: parseFloat(weight) }),
+    });
+    setWeightSaved(true);
+    setTimeout(() => setWeightSaved(false), 2000);
+  };
 
   const getRiskColor = (level) => {
     switch(level) {
@@ -110,6 +129,45 @@ const RightPanel = ({ state, isAnalyzing }) => {
               />
             </PieChart>
           </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Water Tracker */}
+      <div className="glass-panel p-4 flex-none" role="region" aria-label="Water tracker">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted flex items-center gap-2 mb-3">
+          <Droplets size={14} className="text-blue-400" /> Hydration Today
+        </h3>
+        <div className="flex items-center gap-2 mb-2">
+          <div className="flex gap-1 flex-wrap flex-1">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className={`w-5 h-5 rounded-full border transition-all ${i < water ? 'bg-blue-400 border-blue-400' : 'border-border'}`}
+                aria-label={i < water ? 'Glass consumed' : 'Glass remaining'} />
+            ))}
+          </div>
+          <span className="text-xs text-muted font-mono">{water}/8</span>
+        </div>
+        <button onClick={addWater} disabled={water >= 8}
+          className="w-full py-1.5 text-xs font-semibold bg-blue-400/10 text-blue-400 border border-blue-400/30 rounded-xl hover:bg-blue-400/20 transition-all disabled:opacity-40"
+          aria-label="Add a glass of water">
+          + Add Glass
+        </button>
+      </div>
+
+      {/* Weight Log */}
+      <div className="glass-panel p-4 flex-none" role="region" aria-label="Weight logger">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted flex items-center gap-2 mb-3">
+          <Scale size={14} className="text-accent-purple" /> Log Today's Weight
+        </h3>
+        <div className="flex gap-2">
+          <input type="number" value={weight} onChange={e => setWeight(e.target.value)}
+            placeholder="kg" step="0.1" min="20" max="300"
+            aria-label="Weight in kilograms"
+            className="flex-1 bg-background border border-border rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-accent-purple/60 transition-all" />
+          <button onClick={saveWeight} disabled={!weight}
+            aria-label="Save weight"
+            className="px-3 py-2 bg-accent-purple/20 text-accent-purple border border-accent-purple/30 rounded-xl text-xs font-semibold hover:bg-accent-purple/30 transition-all disabled:opacity-40">
+            {weightSaved ? '✓' : 'Save'}
+          </button>
         </div>
       </div>
 

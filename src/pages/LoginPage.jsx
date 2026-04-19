@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Activity, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Activity, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const LoginPage = () => {
@@ -11,7 +11,6 @@ const LoginPage = () => {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [unverified, setUnverified] = useState(false);
 
   const handleChange = (e) => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -27,7 +26,6 @@ const LoginPage = () => {
       const data = await login(form);
       if (data.error) {
         setError(data.error);
-        if (data.unverified) setUnverified(true);
       } else {
         navigate(data.profileComplete ? '/' : '/setup-profile');
       }
@@ -69,14 +67,7 @@ const LoginPage = () => {
               className="flex items-start gap-2 text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl p-3 mb-5 text-sm"
             >
               <AlertCircle size={16} className="shrink-0 mt-0.5" />
-              <div>
-                {error}
-                {unverified && (
-                  <button onClick={() => navigate('/resend-verification', { state: { email: form.email } })}
-                    className="block mt-1 text-accent-neon underline text-xs"
-                  >Resend verification email</button>
-                )}
-              </div>
+              <div>{error}</div>
             </motion.div>
           )}
 

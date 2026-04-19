@@ -1,236 +1,338 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Dumbbell, Activity, Pill, Sliders, CheckCircle2, ChevronRight, User } from 'lucide-react';
+import { Heart, Dumbbell, Activity, Pill, Sliders, CheckCircle2, User, Brain, ShieldAlert, Apple, Ban, Loader2, Save, Sparkles } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalContext';
+import { useAuth } from '../context/AuthContext';
 
 const PROFILES = [
-  {
-    key: 'gym',
-    icon: <Dumbbell size={28} />,
-    label: 'Gym & Muscle Building',
-    description: 'Optimized for hypertrophy. High-protein, caloric surplus, performance macros.',
-    color: 'from-blue-600/20 to-cyan-600/20 border-blue-500/40 hover:border-blue-400/70',
-    accent: 'text-blue-400',
-    targets: { calories: 2800, protein: 180, carbs: 220, fat: 70 },
-    tips: ['Train compound lifts 4-5x/week', 'Eat within 1hr post-workout', 'Sleep 8hrs for muscle recovery', 'Stay above 170g protein daily'],
-  },
-  {
-    key: 'diabetes',
-    icon: <Pill size={28} />,
-    label: 'Diabetes Management',
-    description: 'Low-GI focused diet. Controls blood sugar spikes with slow-releasing carbs.',
-    color: 'from-emerald-600/20 to-teal-600/20 border-emerald-500/40 hover:border-emerald-400/70',
-    accent: 'text-emerald-400',
-    targets: { calories: 1800, protein: 130, carbs: 130, fat: 60 },
-    tips: ['Choose low-GI foods (oats, lentils, broccoli)', 'Eat 5-6 small meals vs 3 large', 'Walk 15 min after each meal', 'Avoid fruit juices — eat whole fruit'],
-  },
-  {
-    key: 'weight_loss',
-    icon: <Activity size={28} />,
-    label: 'Weight Loss & Deficit',
-    description: 'Caloric deficit mode. High protein to preserve muscle while losing fat.',
-    color: 'from-orange-600/20 to-red-600/20 border-orange-500/40 hover:border-orange-400/70',
-    accent: 'text-orange-400',
-    targets: { calories: 1600, protein: 160, carbs: 150, fat: 55 },
-    tips: ['Eat protein at every meal to feel full', 'Prioritize whole foods over processed', 'Drink water before meals', 'Track everything — even small bites'],
-  },
-  {
-    key: 'heart',
-    icon: <Heart size={28} />,
-    label: 'Cardiac Care',
-    description: 'Heart-healthy plan. Low sodium, low saturated fat, high fiber diet.',
-    color: 'from-pink-600/20 to-rose-600/20 border-pink-500/40 hover:border-pink-400/70',
-    accent: 'text-pink-400',
-    targets: { calories: 1900, protein: 120, carbs: 200, fat: 45 },
-    tips: ['Avoid processed/packaged foods', 'Choose fish over red meat', 'Limit sodium to <1500mg/day', 'Eat oats, nuts, olive oil daily'],
-  },
-  {
-    key: 'custom',
-    icon: <Sliders size={28} />,
-    label: 'Custom Blueprint',
-    description: 'Set your own calorie and macro targets tailored to your specific needs.',
-    color: 'from-purple-600/20 to-violet-600/20 border-purple-500/40 hover:border-purple-400/70',
-    accent: 'text-purple-400',
-    targets: null,
-    tips: [],
-  },
+  { key: 'gym',         icon: <Dumbbell size={24}/>, label: 'Gym & Muscle',     color: 'border-blue-500/50 bg-blue-500/10',   accent: 'text-blue-400',   targets: { calories: 2800, protein: 180, carbs: 220, fat: 70 } },
+  { key: 'weight_loss', icon: <Activity size={24}/>, label: 'Weight Loss',      color: 'border-orange-500/50 bg-orange-500/10', accent: 'text-orange-400', targets: { calories: 1600, protein: 160, carbs: 150, fat: 55 } },
+  { key: 'diabetes',    icon: <Pill size={24}/>,     label: 'Diabetes Care',    color: 'border-emerald-500/50 bg-emerald-500/10', accent: 'text-emerald-400', targets: { calories: 1800, protein: 130, carbs: 130, fat: 60 } },
+  { key: 'heart',       icon: <Heart size={24}/>,    label: 'Cardiac Health',   color: 'border-pink-500/50 bg-pink-500/10',   accent: 'text-pink-400',   targets: { calories: 1900, protein: 120, carbs: 200, fat: 45 } },
+  { key: 'general',     icon: <User size={24}/>,     label: 'General Wellness', color: 'border-purple-500/50 bg-purple-500/10', accent: 'text-purple-400', targets: { calories: 2200, protein: 150, carbs: 250, fat: 80 } },
 ];
+
+const CONDITIONS = ['Hypertension', 'High Cholesterol', 'PCOS', 'Thyroid', 'Anemia', 'IBS', 'Lactose Intolerant', 'Gluten Intolerant'];
 
 const HealthProfile = () => {
   const { healthProfile, applyHealthProfile } = useGlobalState();
-  const [selected, setSelected] = useState(null);
-  const [customVals, setCustomVals] = useState({ calories: 2200, protein: 150, carbs: 200, fat: 65 });
+  const { profile, updateProfile, refreshProfile } = useAuth();
+  const [selected, setSelected] = useState(healthProfile?.goal || 'general');
   const [applied, setApplied] = useState(false);
+  const [aiAdvice, setAiAdvice] = useState(null);
+  const [loadingAdvice, setLoadingAdvice] = useState(false);
+  const [savingDetails, setSavingDetails] = useState(false);
+  const [details, setDetails] = useState({
+    height_cm: '', weight_kg: '', gender: 'male',
+    date_of_birth: '', activity_level: 'moderate',
+    neck_cm: '', waist_cm: '', hip_cm: '',
+    health_conditions: [],
+  });
 
-  const handleApply = () => {
-    if (!selected) return;
-    const profile = PROFILES.find(p => p.key === selected);
-    const payload = {
-      goal: selected,
-      label: profile.label,
-      ...(selected === 'custom' ? customVals : profile.targets)
-    };
-    applyHealthProfile(payload);
+  // Load existing profile data
+  useEffect(() => {
+    if (profile) {
+      setDetails({
+        height_cm: profile.height_cm || '',
+        weight_kg: profile.weight_kg || '',
+        gender: profile.gender || 'male',
+        date_of_birth: profile.date_of_birth || '',
+        activity_level: profile.activity_level || 'moderate',
+        neck_cm: profile.neck_cm || '',
+        waist_cm: profile.waist_cm || '',
+        hip_cm: profile.hip_cm || '',
+        health_conditions: profile.health_conditions
+          ? (typeof profile.health_conditions === 'string' ? JSON.parse(profile.health_conditions) : profile.health_conditions)
+          : [],
+      });
+    }
+  }, [profile]);
+
+  const set = (k, v) => setDetails(d => ({ ...d, [k]: v }));
+
+  const toggleCondition = (c) => {
+    setDetails(d => ({
+      ...d,
+      health_conditions: d.health_conditions.includes(c)
+        ? d.health_conditions.filter(x => x !== c)
+        : [...d.health_conditions, c],
+    }));
+  };
+
+  const bmi = details.height_cm && details.weight_kg
+    ? (details.weight_kg / ((details.height_cm / 100) ** 2)).toFixed(1) : null;
+
+  const bmiLabel = bmi
+    ? bmi < 18.5 ? { t: 'Underweight', c: 'text-blue-400' }
+    : bmi < 25   ? { t: 'Normal', c: 'text-green-400' }
+    : bmi < 30   ? { t: 'Overweight', c: 'text-yellow-400' }
+    : { t: 'Obese', c: 'text-red-400' } : null;
+
+  const age = details.date_of_birth
+    ? Math.floor((Date.now() - new Date(details.date_of_birth)) / (365.25 * 24 * 3600 * 1000)) : null;
+
+  const handleSaveDetails = async () => {
+    setSavingDetails(true);
+    await updateProfile({
+      height_cm: parseFloat(details.height_cm) || null,
+      weight_kg: parseFloat(details.weight_kg) || null,
+      gender: details.gender,
+      date_of_birth: details.date_of_birth || null,
+      activity_level: details.activity_level,
+      neck_cm: parseFloat(details.neck_cm) || null,
+      waist_cm: parseFloat(details.waist_cm) || null,
+      hip_cm: parseFloat(details.hip_cm) || null,
+      health_conditions: details.health_conditions,
+    });
+    await refreshProfile();
+    setSavingDetails(false);
+  };
+
+  const handleApplyGoal = () => {
+    const p = PROFILES.find(x => x.key === selected);
+    applyHealthProfile({ goal: selected, label: p.label, ...p.targets });
     setApplied(true);
     setTimeout(() => setApplied(false), 3000);
   };
 
-  const activeProfile = PROFILES.find(p => p.key === healthProfile?.goal);
+  const getAIAdvice = async () => {
+    setLoadingAdvice(true);
+    setAiAdvice(null);
+    const token = localStorage.getItem('nm_token');
+    try {
+      const res = await fetch('/api/user/health-advice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ goal: selected, details }),
+      });
+      const data = await res.json();
+      if (data.advice) setAiAdvice(data.advice);
+    } catch (e) { console.error(e); }
+    setLoadingAdvice(false);
+  };
 
   return (
-    <div className="h-full p-6 overflow-y-auto flex flex-col gap-6">
+    <div className="h-full overflow-y-auto p-6 flex flex-col gap-6">
 
-      {/* Page Title */}
       <div className="shrink-0">
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-          <User className="text-accent-purple" size={28} /> Health Profile
+        <h1 className="text-2xl font-bold flex items-center gap-3">
+          <Heart className="text-accent-purple" size={26} /> Health Profile
         </h1>
-        <p className="text-muted text-sm mt-1">
-          Choose your health goal. NutriMind will adjust all calorie targets, macro ratios, AI suggestions, and risk thresholds to match.
-        </p>
+        <p className="text-muted text-sm mt-1">Complete your health details for personalized AI recommendations.</p>
       </div>
 
-      {/* Current Active Profile Banner */}
-      {healthProfile && activeProfile && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          className={`glass-panel p-4 border-l-4 flex items-center gap-4 ${activeProfile.color.includes('blue') ? 'border-l-blue-400' : activeProfile.color.includes('emerald') ? 'border-l-emerald-400' : activeProfile.color.includes('orange') ? 'border-l-orange-400' : activeProfile.color.includes('pink') ? 'border-l-pink-400' : 'border-l-purple-400'}`}
-        >
-          <div className={activeProfile.accent}>{activeProfile.icon}</div>
-          <div>
-            <div className="text-xs text-muted uppercase tracking-wider font-semibold">Active Profile</div>
-            <div className="font-bold text-foreground">{activeProfile.label}</div>
-            <div className="text-xs text-muted mt-0.5">
-              {healthProfile.calories} kcal | {healthProfile.protein}g protein | {healthProfile.carbs}g carbs | {healthProfile.fat}g fat
-            </div>
-          </div>
-          <CheckCircle2 className="ml-auto text-accent-neon shrink-0" size={22} />
-        </motion.div>
-      )}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
-      {/* Profile Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {PROFILES.map(profile => (
-          <motion.button
-            key={profile.key}
-            onClick={() => setSelected(profile.key === selected ? null : profile.key)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`text-left glass-panel p-5 flex flex-col gap-3 border-2 transition-all duration-200 relative overflow-hidden
-              bg-gradient-to-br ${profile.color}
-              ${selected === profile.key ? 'ring-2 ring-accent-neon ring-offset-1 ring-offset-background scale-[1.01]' : ''}
-            `}
-          >
-            {selected === profile.key && (
-              <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-accent-neon flex items-center justify-center">
-                <CheckCircle2 size={12} className="text-background" />
-              </div>
-            )}
-            <div className={profile.accent}>{profile.icon}</div>
-            <div>
-              <h3 className="font-bold text-foreground text-base">{profile.label}</h3>
-              <p className="text-muted text-xs mt-1 leading-relaxed">{profile.description}</p>
-            </div>
-            {profile.targets && (
-              <div className="flex gap-3 text-xs">
-                <span className="bg-background/50 px-2 py-1 rounded-lg border border-border/50">{profile.targets.calories} kcal</span>
-                <span className="bg-background/50 px-2 py-1 rounded-lg border border-border/50">{profile.targets.protein}g P</span>
-                <span className="bg-background/50 px-2 py-1 rounded-lg border border-border/50">{profile.targets.carbs}g C</span>
-              </div>
-            )}
-            {profile.tips.length > 0 && (
-              <ul className="text-xs text-muted/80 space-y-1 mt-1">
-                {profile.tips.slice(0, 2).map((tip, i) => (
-                  <li key={i} className="flex items-center gap-1.5">
-                    <ChevronRight size={10} className={profile.accent} />
-                    {tip}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </motion.button>
-        ))}
-      </div>
-
-      {/* Custom inputs */}
-      <AnimatePresence>
-        {selected === 'custom' && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-            className="glass-panel p-6"
-          >
-            <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
-              <Sliders size={18} className="text-accent-purple" /> Custom Targets
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { key: 'calories', label: 'Daily Calories', unit: 'kcal', min: 1000, max: 5000 },
-                { key: 'protein', label: 'Protein', unit: 'g', min: 50, max: 300 },
-                { key: 'carbs', label: 'Carbs', unit: 'g', min: 50, max: 500 },
-                { key: 'fat', label: 'Fat', unit: 'g', min: 20, max: 200 },
-              ].map(field => (
-                <div key={field.key}>
-                  <label className="text-xs text-muted uppercase tracking-wider font-semibold block mb-2">{field.label}</label>
-                  <input
-                    type="number"
-                    min={field.min} max={field.max}
-                    value={customVals[field.key]}
-                    onChange={e => setCustomVals(v => ({ ...v, [field.key]: parseInt(e.target.value) || 0 }))}
-                    className="w-full bg-background border border-border rounded-xl px-3 py-2 text-foreground focus:outline-none focus:border-accent-purple/60 focus:ring-1 focus:ring-accent-purple/30 text-sm"
-                  />
-                  <span className="text-xs text-muted mt-1 block">{field.unit}</span>
+        {/* LEFT: Body Details */}
+        <div className="flex flex-col gap-4">
+          <div className="glass-panel p-5">
+            <h2 className="font-bold text-base mb-4 flex items-center gap-2">
+              <User size={16} className="text-accent-neon" /> Body Details
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              {/* Gender */}
+              <div className="col-span-2">
+                <label className="text-xs text-muted uppercase tracking-wider font-semibold block mb-2">Gender</label>
+                <div className="flex gap-2">
+                  {['male','female','other'].map(g => (
+                    <button key={g} onClick={() => set('gender', g)}
+                      className={`flex-1 py-2 rounded-xl border text-xs font-semibold capitalize transition-all
+                        ${details.gender === g ? 'border-accent-neon text-accent-neon bg-accent-neon/10' : 'border-border text-muted hover:border-foreground/30'}`}>
+                      {g}
+                    </button>
+                  ))}
                 </div>
+              </div>
+              {/* DOB */}
+              <div className="col-span-2">
+                <label className="text-xs text-muted uppercase tracking-wider font-semibold block mb-2">Date of Birth {age && <span className="text-accent-neon normal-case">({age} years old)</span>}</label>
+                <input type="date" value={details.date_of_birth} onChange={e => set('date_of_birth', e.target.value)}
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent-neon/60 transition-all" />
+              </div>
+              {/* Height */}
+              <div>
+                <label className="text-xs text-muted uppercase tracking-wider font-semibold block mb-2">Height (cm)</label>
+                <input type="number" value={details.height_cm} onChange={e => set('height_cm', e.target.value)} placeholder="175"
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent-neon/60 transition-all" />
+              </div>
+              {/* Weight */}
+              <div>
+                <label className="text-xs text-muted uppercase tracking-wider font-semibold block mb-2">Weight (kg)</label>
+                <input type="number" value={details.weight_kg} onChange={e => set('weight_kg', e.target.value)} placeholder="70"
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent-neon/60 transition-all" />
+              </div>
+              {/* Neck */}
+              <div>
+                <label className="text-xs text-muted uppercase tracking-wider font-semibold block mb-2">Neck (cm)</label>
+                <input type="number" value={details.neck_cm} onChange={e => set('neck_cm', e.target.value)} placeholder="38"
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent-neon/60 transition-all" />
+              </div>
+              {/* Waist */}
+              <div>
+                <label className="text-xs text-muted uppercase tracking-wider font-semibold block mb-2">Waist (cm)</label>
+                <input type="number" value={details.waist_cm} onChange={e => set('waist_cm', e.target.value)} placeholder="80"
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent-neon/60 transition-all" />
+              </div>
+              {/* Hip */}
+              <div>
+                <label className="text-xs text-muted uppercase tracking-wider font-semibold block mb-2">Hip (cm) <span className="text-muted/60 normal-case text-[10px]">optional</span></label>
+                <input type="number" value={details.hip_cm} onChange={e => set('hip_cm', e.target.value)} placeholder="95"
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent-neon/60 transition-all" />
+              </div>
+              {/* Activity */}
+              <div className="col-span-2">
+                <label className="text-xs text-muted uppercase tracking-wider font-semibold block mb-2">Activity Level</label>
+                <select value={details.activity_level} onChange={e => set('activity_level', e.target.value)}
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent-neon/60 transition-all">
+                  <option value="sedentary">Sedentary — desk job, little exercise</option>
+                  <option value="light">Light — 1-3x/week</option>
+                  <option value="moderate">Moderate — 3-5x/week</option>
+                  <option value="active">Active — 6-7x/week</option>
+                  <option value="very_active">Very Active — physical job + training</option>
+                </select>
+              </div>
+            </div>
+
+            {/* BMI display */}
+            {bmi && (
+              <div className="mt-4 flex items-center justify-between p-3 bg-background/50 border border-border rounded-xl">
+                <div>
+                  <div className="text-xs text-muted uppercase tracking-wider">BMI</div>
+                  <div className="text-xl font-bold">{bmi}</div>
+                </div>
+                <div className={`text-sm font-semibold ${bmiLabel?.c}`}>{bmiLabel?.t}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Health Conditions */}
+          <div className="glass-panel p-5">
+            <h2 className="font-bold text-base mb-3 flex items-center gap-2">
+              <ShieldAlert size={16} className="text-yellow-400" /> Health Conditions
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {CONDITIONS.map(c => (
+                <button key={c} onClick={() => toggleCondition(c)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all
+                    ${details.health_conditions.includes(c)
+                      ? 'bg-yellow-400/20 border-yellow-400/60 text-yellow-300'
+                      : 'border-border text-muted hover:border-foreground/30'}`}>
+                  {c}
+                </button>
               ))}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
 
-      {/* Apply Button */}
-      <div className="shrink-0 flex items-center gap-4">
-        <motion.button
-          onClick={handleApply}
-          disabled={!selected}
-          whileHover={{ scale: selected ? 1.02 : 1 }}
-          whileTap={{ scale: 0.98 }}
-          className="px-8 py-3 bg-gradient-to-r from-accent-neon to-accent-purple text-white font-bold rounded-2xl shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
-        >
-          {applied ? '✅ Profile Activated!' : 'Activate Health Profile'}
-        </motion.button>
-        {applied && (
-          <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-sm text-accent-neon">
-            Your targets, AI suggestions, and risk meter have all been updated!
-          </motion.span>
-        )}
+          <button onClick={handleSaveDetails} disabled={savingDetails}
+            className="flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-accent-neon to-accent-cyan text-background font-bold rounded-xl hover:shadow-[0_0_20px_rgba(14,165,233,0.3)] transition-all disabled:opacity-50">
+            {savingDetails ? <><Loader2 size={16} className="animate-spin" /> Saving…</> : <><Save size={16} /> Save Body Details</>}
+          </button>
+        </div>
+
+        {/* RIGHT: Goal + AI Advice */}
+        <div className="flex flex-col gap-4">
+
+          {/* Goal selector */}
+          <div className="glass-panel p-5">
+            <h2 className="font-bold text-base mb-4 flex items-center gap-2">
+              <Brain size={16} className="text-accent-purple" /> Health Goal
+            </h2>
+            <div className="flex flex-col gap-2">
+              {PROFILES.map(p => (
+                <button key={p.key} onClick={() => setSelected(p.key)}
+                  className={`flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all bg-gradient-to-r ${p.color}
+                    ${selected === p.key ? 'ring-2 ring-accent-neon ring-offset-1 ring-offset-background' : ''}`}>
+                  <span className={p.accent}>{p.icon}</span>
+                  <div className="flex-1">
+                    <div className="font-semibold text-sm">{p.label}</div>
+                    <div className="text-xs text-muted">{p.targets.calories} kcal · {p.targets.protein}g P · {p.targets.carbs}g C</div>
+                  </div>
+                  {selected === p.key && <CheckCircle2 size={16} className="text-accent-neon shrink-0" />}
+                </button>
+              ))}
+            </div>
+            <button onClick={handleApplyGoal}
+              className="w-full mt-4 py-3 bg-gradient-to-r from-accent-neon to-accent-purple text-white font-bold rounded-xl hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all">
+              {applied ? '✅ Goal Activated!' : 'Activate This Goal'}
+            </button>
+          </div>
+
+          {/* AI Food Advice */}
+          <div className="glass-panel p-5 flex-1">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-base flex items-center gap-2">
+                <Apple size={16} className="text-green-400" /> AI Food Advice
+              </h2>
+              <button onClick={getAIAdvice} disabled={loadingAdvice}
+                className="flex items-center gap-1.5 px-4 py-2 bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl text-xs font-semibold hover:bg-green-500/30 transition-all disabled:opacity-50">
+                {loadingAdvice ? <><Loader2 size={12} className="animate-spin" /> Analyzing…</> : <><Sparkles size={12} /> Get AI Advice</>}
+              </button>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {loadingAdvice && (
+                <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-12 gap-3">
+                  <div className="w-8 h-8 border-4 border-green-400 border-t-transparent rounded-full animate-spin" />
+                  <p className="text-muted text-sm animate-pulse">Analyzing your health profile…</p>
+                </motion.div>
+              )}
+
+              {aiAdvice && !loadingAdvice && (
+                <motion.div key="advice" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                  {/* Eat */}
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-green-400 flex items-center gap-1.5 mb-2">
+                      <Apple size={12} /> Eat More Of
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {aiAdvice.eat?.map((f, i) => (
+                        <span key={i} className="px-3 py-1.5 bg-green-500/10 border border-green-500/30 text-green-300 rounded-full text-xs font-medium">{f}</span>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Avoid */}
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-red-400 flex items-center gap-1.5 mb-2">
+                      <Ban size={12} /> Avoid / Limit
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {aiAdvice.avoid?.map((f, i) => (
+                        <span key={i} className="px-3 py-1.5 bg-red-500/10 border border-red-500/30 text-red-300 rounded-full text-xs font-medium">{f}</span>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Tips */}
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-accent-neon flex items-center gap-1.5 mb-2">
+                      <Brain size={12} /> Personalized Tips
+                    </h3>
+                    <ul className="space-y-2">
+                      {aiAdvice.tips?.map((t, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
+                          <span className="text-accent-neon mt-0.5 shrink-0">→</span> {t}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {/* Warning */}
+                  {aiAdvice.warning && (
+                    <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-xl p-3">
+                      <p className="text-xs text-yellow-300"><span className="font-bold">⚠️ Note:</span> {aiAdvice.warning}</p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {!aiAdvice && !loadingAdvice && (
+                <motion.div key="empty" className="flex flex-col items-center justify-center py-12 gap-2 text-center">
+                  <Apple size={40} className="text-muted/20" />
+                  <p className="text-muted text-sm">Click <span className="text-green-400 font-semibold">Get AI Advice</span> to get personalized food recommendations based on your health profile</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
-
-      {/* Tips for selected profile */}
-      <AnimatePresence>
-        {selected && selected !== 'custom' && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="glass-panel p-5"
-          >
-            {(() => {
-              const p = PROFILES.find(pr => pr.key === selected);
-              return (
-                <>
-                  <h3 className={`font-bold text-sm uppercase tracking-wider mb-3 ${p.accent}`}>{p.label} — Key Protocols</h3>
-                  <ul className="space-y-2">
-                    {p.tips.map((tip, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                        <ChevronRight size={14} className={`${p.accent} shrink-0 mt-0.5`} />
-                        {tip}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              );
-            })()}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
     </div>
   );
 };

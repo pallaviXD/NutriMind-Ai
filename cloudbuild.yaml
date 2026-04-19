@@ -1,0 +1,19 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/nutrimind-ai', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/nutrimind-ai']
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'nutrimind-ai'
+      - '--image=gcr.io/$PROJECT_ID/nutrimind-ai'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--port=3001'
+      - '--set-env-vars=NODE_ENV=production,JWT_SECRET=$_JWT_SECRET,GROQ_API_KEY=$_GROQ_API_KEY'
+images:
+  - 'gcr.io/$PROJECT_ID/nutrimind-ai'

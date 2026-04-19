@@ -21,7 +21,8 @@ const ProtectedRoute = ({ children }) => {
   const location = useLocation();
   if (loading) return <LoadingScreen />;
   if (!isAuthenticated) return <Navigate to="/login" state={{ from: location }} replace />;
-  if (!isProfileComplete && location.pathname !== '/setup-profile')
+  // Only redirect to setup if profile is definitively incomplete (not just loading)
+  if (isProfileComplete === false && location.pathname !== '/setup-profile')
     return <Navigate to="/setup-profile" replace />;
   return children;
 };

@@ -77,6 +77,27 @@ export const GlobalProvider = ({ children }) => {
       if (response.insights)    setInsights(prev => ({ ...prev, ...response.insights }));
       if (response.pantryUpdate) setPantry(response.pantryUpdate);
 
+      // Persist meal to DB when AI logs food
+      if (response.newMeals) {
+        const token = localStorage.getItem('nm_token');
+        const slot = Object.keys(response.newMeals)[0];
+        const meal = response.newMeals[slot];
+        if (meal?.cal > 0 && meal?.status === 'completed') {
+          fetch('/api/user/meal-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({
+              food_name: meal.title,
+              calories: meal.cal,
+              protein: response.newMacros ? (response.newMacros.protein - macros.protein) : 0,
+              carbs: response.newMacros ? (response.newMacros.carbs - macros.carbs) : 0,
+              fat: response.newMacros ? (response.newMacros.fat - macros.fat) : 0,
+              meal_type: slot,
+            }),
+          }).catch(console.error);
+        }
+      }
+
       // Recompute daily completion based on newly set calories
       const updatedCals = response.newCalories || calories;
       const pct = Math.min(100, Math.round((updatedCals.current / updatedCals.target) * 100));

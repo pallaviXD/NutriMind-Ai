@@ -15,7 +15,8 @@ const NAV_ITEMS = [
 const Sidebar = ({ onLogout }) => {
   const { healthProfile } = useGlobalState();
   return (
-    <div className="w-16 lg:w-60 h-full bg-panel/80 backdrop-blur-xl border-r border-border flex flex-col transition-all duration-300 shrink-0 z-20">
+    <div className="w-16 lg:w-60 h-full bg-panel/80 backdrop-blur-xl border-r border-border flex flex-col transition-all duration-300 shrink-0 z-20"
+      role="navigation" aria-label="Main navigation">
       {/* Brand */}
       <div className="h-14 flex items-center justify-center lg:justify-start lg:px-5 border-b border-border/50 shrink-0">
         <Activity size={24} className="text-accent-neon shrink-0" />

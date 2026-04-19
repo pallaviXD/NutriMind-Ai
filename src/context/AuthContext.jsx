@@ -47,13 +47,19 @@ export const AuthProvider = ({ children }) => {
     return res.ok ? res.json() : null;
   };
 
-  const signup = async ({ name, email, password, confirmPassword, dateOfBirth }) => {
+  const signup = async ({ name, email, password }) => {
     const res = await fetch(`${API}/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password, confirmPassword, dateOfBirth }),
+      body: JSON.stringify({ name, email, password }),
     });
-    return res.json();
+    const data = await res.json();
+    if (data.token) {
+      localStorage.setItem('nm_token', data.token);
+      localStorage.setItem('nm_user', JSON.stringify(data.user));
+      setUser(data.user);
+    }
+    return data;
   };
 
   const login = async ({ email, password }) => {
@@ -93,15 +99,6 @@ export const AuthProvider = ({ children }) => {
     }).then(r => r.json());
   };
 
-  const resendVerification = async (email) => {
-    const res = await fetch(`${API}/auth/resend-verification`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    return res.json();
-  };
-
   const logout = () => {
     localStorage.removeItem('nm_token');
     localStorage.removeItem('nm_user');
@@ -109,14 +106,15 @@ export const AuthProvider = ({ children }) => {
     setProfile(null);
   };
 
-  const isProfileComplete = profile?.height_cm && profile?.weight_kg;
+  // null = not loaded yet, false = loaded but incomplete, true = complete
+  const isProfileComplete = profile === null ? null : !!(profile?.height_cm && profile?.weight_kg);
 
   return (
     <AuthContext.Provider value={{
       user, profile, loading,
       isAuthenticated: !!user,
       isProfileComplete,
-      signup, login, logout, updateProfile, logWeight, resendVerification, getStats,
+      signup, login, logout, updateProfile, logWeight, getStats,
       refreshProfile: () => fetchProfile(localStorage.getItem('nm_token')),
     }}>
       {children}
