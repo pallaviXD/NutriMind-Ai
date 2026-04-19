@@ -1,16 +1,16 @@
 # NutriMind OS 🧬
 
-> AI-powered personal health intelligence platform — built for the **GFD Virtual Prompt War Hackathon**
+> AI-powered personal health intelligence platform — a full-stack project built to level up skills in React, Node.js, AI integration, and Google Cloud deployment.
 
-NutriMind OS is a full-stack web application that acts as your personal AI health coach. Log meals through natural conversation, get real recipe suggestions from your pantry, track macros and calories in real time, and receive personalized nutrition advice based on your body details, health conditions, and goals — all powered by Llama 3.3 70B via Groq.
+NutriMind OS is a full-stack web application that acts as your personal AI health coach. Log meals through natural conversation, get real recipe suggestions from your pantry, track macros and calories in real time, and receive personalized nutrition advice based on your body details, health conditions, and goals — all powered by Llama 3.3 70B via Groq, deployed on Google Cloud Run.
 
 ---
 
 ## Live Demo
 
-> Deployed on Google Cloud Run — [add your Cloud Run URL here after deployment]
+🚀 [https://nutrimind-ai-368778620053.us-central1.run.app](https://nutrimind-ai-368778620053.us-central1.run.app)
 
-GitHub Repository: [https://github.com/pallaviXD/NutriMind-Ai](https://github.com/pallaviXD/NutriMind-Ai)
+💻 GitHub: [https://github.com/pallaviXD/NutriMind-Ai](https://github.com/pallaviXD/NutriMind-Ai)
 
 ---
 
