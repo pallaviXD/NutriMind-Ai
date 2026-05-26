@@ -344,11 +344,28 @@ router.get('/analytics', (req, res) => {
   `).all(req.user.id);
 
   let streak = 0;
-  const today = new Date().toISOString().split('T')[0];
-  for (let i = 0; i < recentDays.length; i++) {
-    const expected = new Date(Date.now() - i * 86400000).toISOString().split('T')[0];
-    if (recentDays[i]?.day === expected) streak++;
-    else break;
+  if (recentDays.length > 0) {
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    
+    let expectedTime = null;
+    if (recentDays[0].day === today) {
+      expectedTime = new Date(today).getTime();
+    } else if (recentDays[0].day === yesterday) {
+      expectedTime = new Date(yesterday).getTime();
+    }
+
+    if (expectedTime !== null) {
+      for (let i = 0; i < recentDays.length; i++) {
+        const expectedDateStr = new Date(expectedTime).toISOString().split('T')[0];
+        if (recentDays[i].day === expectedDateStr) {
+          streak++;
+          expectedTime -= 86400000;
+        } else {
+          break;
+        }
+      }
+    }
   }
 
   res.json({ dailyTotals, weightLogs, todayByMeal, totalMeals: totalMeals.count, streak });
