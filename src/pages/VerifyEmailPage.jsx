@@ -10,8 +10,13 @@ const VerifyEmailPage = () => {
   const [status, setStatus] = useState('loading'); // loading | success | error
   const [message, setMessage] = useState('');
 
+  const fetchedRef = React.useRef(false);
+
   useEffect(() => {
     if (!token) { setStatus('error'); setMessage('No verification token found.'); return; }
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+
     fetch(`/api/auth/verify/${token}`)
       .then(r => r.json())
       .then(data => {

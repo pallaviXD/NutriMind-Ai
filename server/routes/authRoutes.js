@@ -1,7 +1,9 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import db from '../db.js';
 import { signToken } from '../auth.js';
+import { sendVerificationEmail } from '../mailer.js';
 
 const router = express.Router();
 
@@ -24,25 +26,53 @@ router.post('/signup', async (req, res) => {
       return res.status(409).json({ error: 'An account with this email already exists.' });
 
     const hash = await bcrypt.hash(password, 12);
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+    const verifyExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
     const { lastInsertRowid } = db.prepare(`
-      INSERT INTO users (name, email, password_hash, is_verified)
-      VALUES (?, ?, ?, 1)
-    `).run(name.trim(), email.toLowerCase().trim(), hash);
+      INSERT INTO users (name, email, password_hash, is_verified, verify_token, verify_token_expires)
+      VALUES (?, ?, ?, 0, ?, ?)
+    `).run(name.trim(), email.toLowerCase().trim(), hash, verifyToken, verifyExpires);
 
     db.prepare('INSERT INTO profiles (user_id) VALUES (?)').run(lastInsertRowid);
 
-    const token = signToken({ id: lastInsertRowid, email: email.toLowerCase(), name: name.trim() });
+    try {
+      await sendVerificationEmail(name.trim(), email.toLowerCase().trim(), verifyToken);
+    } catch (emailErr) {
+      console.error('Failed to send verification email:', emailErr);
+    }
 
     res.json({
       success: true,
-      token,
-      user: { id: lastInsertRowid, name: name.trim(), email: email.toLowerCase() },
-      profileComplete: false,
+      requiresVerification: true,
+      message: 'Registration successful. Please check your email to verify your account.'
     });
   } catch (err) {
     console.error('Signup error:', err);
     res.status(500).json({ error: 'Server error during signup. Please try again.' });
+  }
+});
+
+// ─── GET /api/auth/verify/:token ──────────────────────────────────────────────
+router.get('/verify/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    const user = db.prepare('SELECT id, verify_token_expires FROM users WHERE verify_token = ?').get(token);
+    
+    if (!user) {
+      return res.status(400).json({ success: false, error: 'Invalid verification token.' });
+    }
+    
+    if (user.verify_token_expires < Date.now()) {
+      return res.status(400).json({ success: false, error: 'Verification token has expired.' });
+    }
+
+    db.prepare('UPDATE users SET is_verified = 1, verify_token = NULL, verify_token_expires = NULL WHERE id = ?').run(user.id);
+    
+    res.json({ success: true, message: 'Email verified successfully. You can now log in.' });
+  } catch (err) {
+    console.error('Verify error:', err);
+    res.status(500).json({ success: false, error: 'Server error during verification.' });
   }
 });
 
@@ -56,6 +86,9 @@ router.post('/login', async (req, res) => {
     const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase().trim());
     if (!user)
       return res.status(401).json({ error: 'Invalid email or password.' });
+
+    if (user.is_verified === 0)
+      return res.status(403).json({ error: 'Please verify your email before logging in.' });
 
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid)

@@ -32,7 +32,7 @@ const sendMail = async (to, subject, html) => {
 };
 
 export const sendVerificationEmail = async (name, email, token) => {
-  const verifyUrl = `${process.env.CLIENT_URL || 'http://localhost:5175'}/verify-email?token=${token}`;
+  const verifyUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify-email?token=${token}`;
   return sendMail(email, 'Verify your NutriMind OS account', `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#09090b;color:#fafafa;padding:40px;border-radius:16px;">
       <div style="text-align:center;margin-bottom:32px;">
@@ -71,7 +71,7 @@ export const sendWelcomeEmail = async (name, email) => {
         <li>💪 Follow your personalized workout plan</li>
       </ul>
       <div style="text-align:center;margin:32px 0;">
-        <a href="${process.env.CLIENT_URL || 'http://localhost:5175'}" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);color:white;padding:16px 40px;border-radius:50px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;">
+        <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);color:white;padding:16px 40px;border-radius:50px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;">
           Open NutriMind OS →
         </a>
       </div>
