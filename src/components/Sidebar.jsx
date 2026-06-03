@@ -14,6 +14,7 @@ const NAV_ITEMS = [
 
 const Sidebar = ({ onLogout, isExpanded = true }) => {
   const { healthProfile } = useGlobalState();
+  const Motion = motion;
   return (
     <div className={`w-16 ${isExpanded ? 'lg:w-60' : 'lg:w-16'} h-full bg-panel/80 backdrop-blur-xl border-r border-border flex flex-col transition-all duration-300 shrink-0 z-20`}
       role="navigation" aria-label="Main navigation">
@@ -29,7 +30,7 @@ const Sidebar = ({ onLogout, isExpanded = true }) => {
       {/* Nav */}
       <nav className="flex-1 py-4 flex flex-col gap-1 px-2 overflow-y-auto">
         {NAV_ITEMS.map(item => (
-          <NavItem key={item.to} {...item} isExpanded={isExpanded} />
+          <NavItem key={item.to} {...item} isExpanded={isExpanded} Motion={Motion} />
         ))}
       </nav>
 
@@ -52,21 +53,24 @@ const Sidebar = ({ onLogout, isExpanded = true }) => {
   );
 };
 
-const NavItem = ({ to, icon, label, isExpanded }) => (
-  <NavLink to={to} end={to === '/'}
-    className={({ isActive }) =>
-      `relative flex items-center justify-center ${isExpanded ? 'lg:justify-start' : ''} px-3 py-2.5 rounded-xl transition-all duration-200 group
-      ${isActive ? 'text-accent-neon bg-accent-neon/10 font-semibold' : 'text-muted hover:bg-panel hover:text-foreground'}`
-    }
-  >
-    {({ isActive }) => (
-      <>
-        {isActive && <motion.div layoutId="navIndicator" className="absolute left-0 top-1 bottom-1 w-0.5 bg-accent-neon rounded-r-full" initial={false} transition={motion ? { type: 'spring', stiffness: 350, damping: 30 } : undefined} />}
-        <div className="shrink-0">{icon}</div>
-        <span className={`${isExpanded ? 'hidden lg:block' : 'hidden'} ml-3 text-sm truncate`}>{label}</span>
-      </>
-    )}
-  </NavLink>
-);
+const NavItem = ({ to, icon, label, isExpanded, Motion }) => {
+  const NavIndicator = Motion.div;
+  return (
+    <NavLink to={to} end={to === '/'}
+      className={({ isActive }) =>
+        `relative flex items-center justify-center ${isExpanded ? 'lg:justify-start' : ''} px-3 py-2.5 rounded-xl transition-all duration-200 group
+        ${isActive ? 'text-accent-neon bg-accent-neon/10 font-semibold' : 'text-muted hover:bg-panel hover:text-foreground'}`
+      }
+    >
+      {({ isActive }) => (
+        <>
+          {isActive && <NavIndicator layoutId="navIndicator" className="absolute left-0 top-1 bottom-1 w-0.5 bg-accent-neon rounded-r-full" initial={false} transition={{ type: 'spring', stiffness: 350, damping: 30 }} />}
+          <div className="shrink-0">{icon}</div>
+          <span className={`${isExpanded ? 'hidden lg:block' : 'hidden'} ml-3 text-sm truncate`}>{label}</span>
+        </>
+      )}
+    </NavLink>
+  );
+};
 
 export default Sidebar;
