@@ -372,12 +372,24 @@ router.get('/analytics', (req, res) => {
 });
 
 // ─── POST /api/user/water-log ─────────────────────────────────────────────────
+// Inside server/routes/userRoutes.js
 router.post('/water-log', (req, res) => {
   const { glasses } = req.body;
-  // Store in a simple key-value using profiles table updated_at trick
-  // We'll use a dedicated approach: store today's water in profile
-  db.prepare(`UPDATE profiles SET updated_at = unixepoch() WHERE user_id = ?`).run(req.user.id);
-  res.json({ success: true, glasses });
+  
+  try {
+    // Fix: Save the 'glasses' payload to the database alongside the timestamp.
+    // (If the user is adding to their total, use `water_intake = water_intake + ?`)
+    db.prepare(`
+      UPDATE profiles 
+      SET water_intake = ?, updated_at = unixepoch() 
+      WHERE user_id = ?
+    `).run(glasses, req.user.id);
+    
+    res.json({ success: true, glasses });
+  } catch (error) {
+    console.error("Error logging water intake:", error);
+    res.status(500).json({ success: false, error: "Failed to log water intake." });
+  }
 });
 
 export default router;
