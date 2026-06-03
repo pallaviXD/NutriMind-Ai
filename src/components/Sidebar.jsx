@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { Activity, LayoutDashboard, ChefHat, LineChart, HeartPulse, Dumbbell, LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useGlobalState } from '../context/GlobalContext';
+const MotionDiv = motion.div;
 
 const NAV_ITEMS = [
   { to: '/',          icon: <LayoutDashboard size={20} />, label: 'Command Center' },
@@ -61,7 +62,7 @@ const NavItem = ({ to, icon, label, isExpanded }) => (
   >
     {({ isActive }) => (
       <>
-        {isActive && <motion.div layoutId="navIndicator" className="absolute left-0 top-1 bottom-1 w-0.5 bg-accent-neon rounded-r-full" initial={false} transition={{ type: 'spring', stiffness: 350, damping: 30 }} />}
+        {isActive && <MotionDiv layoutId="navIndicator" className="absolute left-0 top-1 bottom-1 w-0.5 bg-accent-neon rounded-r-full" initial={false} transition={{ type: 'spring', stiffness: 350, damping: 30 }} />}
         <div className="shrink-0">{icon}</div>
         <span className={`${isExpanded ? 'hidden lg:block' : 'hidden'} ml-3 text-sm truncate`}>{label}</span>
       </>
