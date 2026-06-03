@@ -43,9 +43,7 @@ const AppLayout = () => {
   const { profileLabel } = useGlobalState();
   const { user, logout } = useAuth();
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
-  const MotionButton = motion.button;
-  const MotionSpan = motion.span;
-  const MotionDiv = motion.div;
+  const buttonHoverEffect = motion ? { y: -1 } : undefined;
 
   return (
     <div className="flex h-screen w-screen bg-background text-foreground overflow-hidden">
@@ -60,17 +58,17 @@ const AppLayout = () => {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-xs text-muted hidden md:block">Hi, <span className="text-foreground font-medium">{user?.name}</span></span>
-            <MotionButton
+            <motion.button
               type="button"
               onClick={() => setIsSidebarExpanded(prev => !prev)}
-              className="relative h-8 px-3 rounded-full border border-accent-neon/40 bg-accent-neon/10 text-accent-neon hover:border-accent-neon/70 hover:bg-accent-neon/20 transition-all overflow-hidden"
+              className="group relative h-8 px-3 rounded-full border border-accent-neon/40 bg-accent-neon/10 text-accent-neon hover:border-accent-neon/70 hover:bg-accent-neon/20 transition-all overflow-hidden"
               whileTap={{ scale: 0.95 }}
-              whileHover={{ y: -1 }}
+              whileHover={buttonHoverEffect}
               aria-label={isSidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
               title={isSidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
             >
-              <span className="absolute inset-0 bg-gradient-to-r from-accent-purple/20 via-accent-neon/10 to-accent-purple/20 opacity-0 hover:opacity-100 transition-opacity" />
-              <MotionSpan
+              <span className="absolute inset-0 bg-gradient-to-r from-accent-purple/20 via-accent-neon/10 to-accent-purple/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <motion.span
                 key={isSidebarExpanded ? 'collapse' : 'expand'}
                 initial={{ opacity: 0, rotate: -30, scale: 0.8 }}
                 animate={{ opacity: 1, rotate: 0, scale: 1 }}
@@ -79,13 +77,13 @@ const AppLayout = () => {
               >
                 {isSidebarExpanded ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
                 <span className="hidden lg:inline">{isSidebarExpanded ? 'Collapse' : 'Expand'}</span>
-              </MotionSpan>
-            </MotionButton>
+              </motion.span>
+            </motion.button>
             <div className="flex items-center gap-2 bg-background/60 border border-border rounded-full px-4 py-1.5 text-xs font-medium">
               <span className="w-2 h-2 rounded-full bg-accent-neon animate-pulse" />
-              <MotionSpan key={profileLabel} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-accent-neon font-bold">
+              <motion.span key={profileLabel} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-accent-neon font-bold">
                 {profileLabel}
-              </MotionSpan>
+              </motion.span>
             </div>
           </div>
         </header>
@@ -93,7 +91,7 @@ const AppLayout = () => {
         {/* Animated page content */}
         <div className="flex-1 overflow-hidden relative">
           <AnimatePresence mode="wait">
-            <MotionDiv key={location.pathname} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.22 }} className="h-full">
+            <motion.div key={location.pathname} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.22 }} className="h-full">
               <Routes location={location}>
                 <Route path="/"          element={<Dashboard />} />
                 <Route path="/kitchen"   element={<Kitchen />} />
@@ -101,7 +99,7 @@ const AppLayout = () => {
                 <Route path="/health"    element={<HealthProfile />} />
                 <Route path="/workouts"  element={<Workouts />} />
               </Routes>
-            </MotionDiv>
+            </motion.div>
           </AnimatePresence>
         </div>
       </div>
