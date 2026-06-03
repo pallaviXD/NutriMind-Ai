@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion as Motion } from 'framer-motion';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { GlobalProvider, useGlobalState } from './context/GlobalContext';
@@ -43,7 +43,6 @@ const AppLayout = () => {
   const { profileLabel } = useGlobalState();
   const { user, logout } = useAuth();
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
-  const Motion = motion;
 
   return (
     <div className="flex h-screen w-screen bg-background text-foreground overflow-hidden">
