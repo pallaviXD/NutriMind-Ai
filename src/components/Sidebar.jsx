@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Activity, LayoutDashboard, ChefHat, LineChart, HeartPulse, Dumbbell, LogOut } from 'lucide-react';
-import { motion as Motion } from 'framer-motion';
+import { motion as FramerMotion } from 'framer-motion';
 import { useGlobalState } from '../context/GlobalContext';
 
 const NAV_ITEMS = [
@@ -62,7 +62,7 @@ const NavItem = ({ to, icon, label, isExpanded }) => {
     >
       {({ isActive }) => (
         <>
-          {isActive && <Motion.div layoutId="navIndicator" className="absolute left-0 top-1 bottom-1 w-0.5 bg-accent-neon rounded-r-full" initial={false} transition={{ type: 'spring', stiffness: 350, damping: 30 }} />}
+          {isActive && <FramerMotion.div layoutId="navIndicator" className="absolute left-0 top-1 bottom-1 w-0.5 bg-accent-neon rounded-r-full" initial={false} transition={{ type: 'spring', stiffness: 350, damping: 30 }} />}
           <div className="shrink-0">{icon}</div>
           <span className={`${isExpanded ? 'hidden lg:block' : 'hidden'} ml-3 text-sm truncate`}>{label}</span>
         </>

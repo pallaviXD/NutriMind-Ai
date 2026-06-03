@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion as Motion } from 'framer-motion';
+import { AnimatePresence, motion as FramerMotion } from 'framer-motion';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { GlobalProvider, useGlobalState } from './context/GlobalContext';
@@ -57,7 +57,7 @@ const AppLayout = () => {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-xs text-muted hidden md:block">Hi, <span className="text-foreground font-medium">{user?.name}</span></span>
-            <Motion.button
+            <FramerMotion.button
               type="button"
               onClick={() => setIsSidebarExpanded(prev => !prev)}
               className="group relative h-8 px-3 rounded-full border border-accent-neon/40 bg-accent-neon/10 text-accent-neon hover:border-accent-neon/70 hover:bg-accent-neon/20 transition-all overflow-hidden"
@@ -67,7 +67,7 @@ const AppLayout = () => {
               title={isSidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
             >
               <span className="absolute inset-0 bg-gradient-to-r from-accent-purple/20 via-accent-neon/10 to-accent-purple/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Motion.span
+              <FramerMotion.span
                 key={isSidebarExpanded ? 'collapse' : 'expand'}
                 initial={{ opacity: 0, rotate: -30, scale: 0.8 }}
                 animate={{ opacity: 1, rotate: 0, scale: 1 }}
@@ -76,13 +76,13 @@ const AppLayout = () => {
               >
                 {isSidebarExpanded ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
                 <span className="hidden lg:inline">{isSidebarExpanded ? 'Collapse' : 'Expand'}</span>
-              </Motion.span>
-            </Motion.button>
+              </FramerMotion.span>
+            </FramerMotion.button>
             <div className="flex items-center gap-2 bg-background/60 border border-border rounded-full px-4 py-1.5 text-xs font-medium">
               <span className="w-2 h-2 rounded-full bg-accent-neon animate-pulse" />
-              <Motion.span key={profileLabel} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-accent-neon font-bold">
+              <FramerMotion.span key={profileLabel} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-accent-neon font-bold">
                 {profileLabel}
-              </Motion.span>
+              </FramerMotion.span>
             </div>
           </div>
         </header>
@@ -90,7 +90,7 @@ const AppLayout = () => {
         {/* Animated page content */}
         <div className="flex-1 overflow-hidden relative">
           <AnimatePresence mode="wait">
-            <Motion.div key={location.pathname} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.22 }} className="h-full">
+            <FramerMotion.div key={location.pathname} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.22 }} className="h-full">
               <Routes location={location}>
                 <Route path="/"          element={<Dashboard />} />
                 <Route path="/kitchen"   element={<Kitchen />} />
@@ -98,7 +98,7 @@ const AppLayout = () => {
                 <Route path="/health"    element={<HealthProfile />} />
                 <Route path="/workouts"  element={<Workouts />} />
               </Routes>
-            </Motion.div>
+            </FramerMotion.div>
           </AnimatePresence>
         </div>
       </div>
