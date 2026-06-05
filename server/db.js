@@ -63,6 +63,17 @@ db.exec(`
     notes TEXT,
     logged_at INTEGER DEFAULT (unixepoch())
   );
+
+  CREATE TABLE IF NOT EXISTS workout_plans (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    request_hash TEXT NOT NULL,
+    plan_data TEXT NOT NULL,
+    version INTEGER DEFAULT 1,
+    created_at INTEGER DEFAULT (unixepoch())
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_wp_user_hash ON workout_plans(user_id, request_hash);
 `);
 
 export default db;
