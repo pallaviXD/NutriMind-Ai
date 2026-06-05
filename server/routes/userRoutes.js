@@ -3,6 +3,89 @@ import db from '../db.js';
 import { authMiddleware } from '../auth.js';
 import Groq from 'groq-sdk';
 
+// ─── AI Reliability Helpers ──────────────────────────────────────────────────
+
+/**
+ * Calls Groq API with retry + exponential backoff.
+ * Retries up to `maxRetries` times on transient errors (429, 500, 502, 503, 504).
+ * Non-retryable errors (400, 401, 403) throw immediately.
+ */
+async function callGroqWithRetry(groq, params, maxRetries = 3) {
+  let lastError;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await groq.chat.completions.create(params);
+      return result;
+    } catch (err) {
+      lastError = err;
+      const status = err?.status || err?.statusCode || err?.error?.status;
+      const retryableStatuses = [429, 500, 502, 503, 504];
+
+      // Don't retry non-transient errors
+      if (status && !retryableStatuses.includes(status)) {
+        throw err;
+      }
+
+      if (attempt < maxRetries) {
+        const delay = Math.min(500 * Math.pow(2, attempt - 1), 4000); // 500ms, 1s, 2s
+        console.warn(`Groq attempt ${attempt}/${maxRetries} failed (${status || 'network'}), retrying in ${delay}ms...`);
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+  }
+  throw lastError;
+}
+
+/**
+ * Safely parse JSON with repair attempts for common LLM output issues:
+ * - Strips markdown code fences (```json ... ```)
+ * - Removes trailing commas before } or ]
+ * - Returns null if all repair attempts fail
+ */
+function safeParseJSON(text) {
+  if (!text || typeof text !== 'string') return null;
+
+  // Attempt 1: direct parse
+  try {
+    return JSON.parse(text);
+  } catch {
+    // continue to repair
+  }
+
+  // Attempt 2: strip markdown fences and trim
+  let cleaned = text
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```\s*$/i, '')
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    // continue to repair
+  }
+
+  // Attempt 3: remove trailing commas before } or ]
+  cleaned = cleaned.replace(/,\s*([}\]])/g, '$1');
+
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    // continue to repair
+  }
+
+  // Attempt 4: try to extract the first JSON object from the text
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      return JSON.parse(jsonMatch[0]);
+    } catch {
+      // give up
+    }
+  }
+
+  return null;
+}
+
 const router = express.Router();
 
 // All routes require auth
@@ -131,7 +214,12 @@ router.post('/chat', async (req, res) => {
   if (!message) return res.status(400).json({ error: 'Message is required.' });
 
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'AI not configured. Add GROQ_API_KEY to .env' });
+  if (!apiKey) return res.status(503).json({
+    success: false,
+    errorCode: 'AI_NOT_CONFIGURED',
+    error: 'AI not configured. Add GROQ_API_KEY to .env',
+    meta: { fallbackUsed: false, providerLatencyMs: 0 },
+  });
 
   const user = db.prepare('SELECT name FROM users WHERE id = ?').get(req.user.id);
   const profile = db.prepare('SELECT * FROM profiles WHERE user_id = ?').get(req.user.id);
@@ -165,6 +253,7 @@ ALWAYS respond with ONLY valid JSON (no markdown, no extra text):
 
 Set newCalories/newMacros/newMeals ONLY when user logs food. Otherwise set them to null. Current calories to add to: ${calories?.current || 0}. Goal guidance for ${goal}: ${getGoalGuidance(goal)}.`;
 
+  const startTime = Date.now();
   try {
     const groq = new Groq({ apiKey });
 
@@ -178,7 +267,7 @@ Set newCalories/newMacros/newMeals ONLY when user logs food. Otherwise set them 
       { role: 'user', content: message },
     ];
 
-    const completion = await groq.chat.completions.create({
+    const completion = await callGroqWithRetry(groq, {
       model: 'llama-3.3-70b-versatile',
       messages,
       temperature: 0.7,
@@ -186,8 +275,19 @@ Set newCalories/newMacros/newMeals ONLY when user logs food. Otherwise set them 
       response_format: { type: 'json_object' },
     });
 
+    const providerLatencyMs = Date.now() - startTime;
     const text = completion.choices[0]?.message?.content?.trim();
-    const parsed = JSON.parse(text);
+    const parsed = safeParseJSON(text);
+
+    if (!parsed) {
+      console.error('Chat JSON parse failed after repair. Raw:', text?.substring(0, 200));
+      return res.status(502).json({
+        success: false,
+        errorCode: 'AI_INVALID_RESPONSE',
+        error: 'AI returned an invalid response. Please try again.',
+        meta: { fallbackUsed: false, providerLatencyMs },
+      });
+    }
 
     if (parsed.newMacros) {
       parsed.newMacros = {
@@ -207,10 +307,17 @@ Set newCalories/newMacros/newMeals ONLY when user logs food. Otherwise set them 
       riskLevel: parsed.riskLevel || null,
       insights: parsed.insights || null,
       pantryUpdate: parsed.pantryUpdate || null,
+      meta: { fallbackUsed: false, providerLatencyMs },
     });
   } catch (err) {
-    console.error('Chat error:', err.message);
-    res.status(500).json({ error: err.message });
+    const providerLatencyMs = Date.now() - startTime;
+    console.error('Chat error after retries:', err.message);
+    res.status(503).json({
+      success: false,
+      errorCode: 'AI_UNAVAILABLE',
+      error: 'AI service is temporarily unavailable. Please try again in a moment.',
+      meta: { fallbackUsed: false, providerLatencyMs },
+    });
   }
 });
 
@@ -228,7 +335,11 @@ function getGoalGuidance(goal) {
 router.post('/recipe', async (req, res) => {
   const { pantry, mealType, calsLeft, proteinLeft, goal } = req.body;
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'AI not configured.' });
+  if (!apiKey) return res.status(503).json({
+    success: false, errorCode: 'AI_NOT_CONFIGURED',
+    error: 'AI not configured.',
+    meta: { fallbackUsed: false, providerLatencyMs: 0 },
+  });
 
   const profile = db.prepare('SELECT * FROM profiles WHERE user_id = ?').get(req.user.id);
   const conditions = profile?.health_conditions && profile.health_conditions !== '[]'
@@ -239,19 +350,33 @@ Constraints: ~${Math.min(calsLeft, 700)} kcal, at least ${Math.min(proteinLeft, 
 Respond ONLY with valid JSON:
 {"name":"Recipe Name","description":"one line","calories":number,"protein":number,"carbs":number,"fat":number,"time":"X mins","ingredients":["item with qty"],"steps":["step"],"tips":"one tip"}`;
 
+  const startTime = Date.now();
   try {
     const groq = new Groq({ apiKey });
-    const completion = await groq.chat.completions.create({
+    const completion = await callGroqWithRetry(groq, {
       model: 'llama-3.3-70b-versatile',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7, max_tokens: 1024,
       response_format: { type: 'json_object' },
     });
-    const recipe = JSON.parse(completion.choices[0]?.message?.content);
-    res.json({ recipe });
+    const providerLatencyMs = Date.now() - startTime;
+    const recipe = safeParseJSON(completion.choices[0]?.message?.content);
+    if (!recipe) {
+      return res.status(502).json({
+        success: false, errorCode: 'AI_INVALID_RESPONSE',
+        error: 'AI returned an invalid recipe response. Please try again.',
+        meta: { fallbackUsed: false, providerLatencyMs },
+      });
+    }
+    res.json({ success: true, recipe, meta: { fallbackUsed: false, providerLatencyMs } });
   } catch (err) {
-    console.error('Recipe error:', err.message);
-    res.status(500).json({ error: err.message });
+    const providerLatencyMs = Date.now() - startTime;
+    console.error('Recipe error after retries:', err.message);
+    res.status(503).json({
+      success: false, errorCode: 'AI_UNAVAILABLE',
+      error: 'AI service is temporarily unavailable. Please try again.',
+      meta: { fallbackUsed: false, providerLatencyMs },
+    });
   }
 });
 
@@ -259,7 +384,11 @@ Respond ONLY with valid JSON:
 router.post('/health-advice', async (req, res) => {
   const { goal, details } = req.body;
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'AI not configured.' });
+  if (!apiKey) return res.status(503).json({
+    success: false, errorCode: 'AI_NOT_CONFIGURED',
+    error: 'AI not configured.',
+    meta: { fallbackUsed: false, providerLatencyMs: 0 },
+  });
 
   const age = details.date_of_birth
     ? Math.floor((Date.now() - new Date(details.date_of_birth)) / (365.25 * 24 * 3600 * 1000)) : null;
@@ -270,19 +399,33 @@ router.post('/health-advice', async (req, res) => {
 Give specific personalized food advice. Respond ONLY with valid JSON:
 {"eat":["food1","food2","food3","food4","food5","food6"],"avoid":["food1","food2","food3","food4","food5"],"tips":["tip1","tip2","tip3","tip4"],"warning":"important warning or null"}`;
 
+  const startTime = Date.now();
   try {
     const groq = new Groq({ apiKey });
-    const completion = await groq.chat.completions.create({
+    const completion = await callGroqWithRetry(groq, {
       model: 'llama-3.3-70b-versatile',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.6, max_tokens: 800,
       response_format: { type: 'json_object' },
     });
-    const advice = JSON.parse(completion.choices[0]?.message?.content);
-    res.json({ advice });
+    const providerLatencyMs = Date.now() - startTime;
+    const advice = safeParseJSON(completion.choices[0]?.message?.content);
+    if (!advice) {
+      return res.status(502).json({
+        success: false, errorCode: 'AI_INVALID_RESPONSE',
+        error: 'AI returned an invalid response. Please try again.',
+        meta: { fallbackUsed: false, providerLatencyMs },
+      });
+    }
+    res.json({ success: true, advice, meta: { fallbackUsed: false, providerLatencyMs } });
   } catch (err) {
-    console.error('Health advice error:', err.message);
-    res.status(500).json({ error: err.message });
+    const providerLatencyMs = Date.now() - startTime;
+    console.error('Health advice error after retries:', err.message);
+    res.status(503).json({
+      success: false, errorCode: 'AI_UNAVAILABLE',
+      error: 'AI service is temporarily unavailable. Please try again.',
+      meta: { fallbackUsed: false, providerLatencyMs },
+    });
   }
 });
 
