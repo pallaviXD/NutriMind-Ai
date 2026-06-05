@@ -69,6 +69,15 @@ export const GlobalProvider = ({ children }) => {
         calories, macros, meals, pantry, chatHistory, healthProfile, ...contextParams
       });
 
+      // If the AI returned an error (backend failure, not network), show as system warning
+      if (response.isError) {
+        setChatHistory(prev => [...prev, {
+          role: 'system',
+          text: response.message,
+        }]);
+        return;
+      }
+
       if (response.newMeals)    setMeals(prev => ({ ...prev, ...response.newMeals }));
       if (response.newCalories) setCalories(prev => ({ ...prev, ...response.newCalories }));
       if (response.newMacros)   setMacros(prev => ({ ...prev, ...response.newMacros }));
