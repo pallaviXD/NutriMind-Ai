@@ -45,7 +45,7 @@ const AppLayout = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
 
   return (
-    <div className="flex h-screen w-screen bg-background text-foreground overflow-hidden">
+    <div className="flex min-h-screen w-screen bg-background text-foreground">
       <SystemStatusLayer isAnalyzing={false} />
       <Sidebar onLogout={logout} isExpanded={isSidebarExpanded} />
 
@@ -88,7 +88,7 @@ const AppLayout = () => {
         </header>
 
         {/* Animated page content */}
-        <div className="flex-1 overflow-hidden relative">
+        <div className="flex-1 relative overflow-y-auto">
           <AnimatePresence mode="wait">
             <FramerMotion.div key={location.pathname} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.22 }} className="h-full">
               <Routes location={location}>

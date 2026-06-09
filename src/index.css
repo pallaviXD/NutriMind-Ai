@@ -12,28 +12,31 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased overflow-hidden selection:bg-accent-purple/30;
+    @apply bg-background text-foreground font-sans antialiased selection:bg-accent-purple/30;
     margin: 0;
     min-height: 100vh;
+    overflow-y: auto;
   }
 }
 
 @layer utilities {
   .glass-panel {
-    @apply bg-[#18181b]/60 backdrop-blur-xl border border-border rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.5)];
+    @apply bg-[#18181b]/60 backdrop-blur-xl border border-border rounded-2xl;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
   }
-  
+
   .glass-panel-glow {
-    @apply glass-panel transition-all duration-300 hover:border-accent-purple/50 hover:shadow-[0_0_20px_rgba(139,92,246,0.15)];
+    @apply glass-panel transition-all duration-300 hover:border-accent-purple/50 hover:shadow-[0_0_20px_rgba(139, 92, 246, 0.15)];
   }
 
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-accent-cyan via-accent-neon to-accent-purple;
   }
-  
+
   .border-gradient {
     position: relative;
   }
+
   .border-gradient::before {
     content: "";
     position: absolute;
@@ -53,12 +56,15 @@
 ::-webkit-scrollbar {
   width: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   @apply bg-border rounded-full;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-muted;
 }
