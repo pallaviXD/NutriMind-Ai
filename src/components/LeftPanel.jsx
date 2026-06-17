@@ -41,24 +41,23 @@ const LeftPanel = () => {
   const { chatHistory, isAnalyzing, processUserInput, calories, macros } = useGlobalState();
   const { user, profile } = useAuth();
   const [input, setInput] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  const suggestions = React.useMemo(
+    () => getSuggestions(calories, macros, profile),
+    [calories, macros, profile]
+  );
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory, isAnalyzing]);
-
-  useEffect(() => {
-    setSuggestions(getSuggestions(calories, macros, profile));
-  }, [calories.current, macros.protein]);
 
   const handleSend = (e) => {
     e?.preventDefault();
     const text = input.trim();
     if (!text || isAnalyzing) return;
     setInput('');
-    setSuggestions(getSuggestions(calories, macros, profile));
     processUserInput(text);
   };
 
@@ -66,8 +65,7 @@ const LeftPanel = () => {
     if (isAnalyzing) return;
     setInput('');
     processUserInput(text);
-    setSuggestions(getSuggestions(calories, macros, profile));
-  };
+  }; 
 
   const handleQuickAction = (key) => {
     if (isAnalyzing) return;

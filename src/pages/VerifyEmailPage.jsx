@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle2, XCircle, Loader2, Activity } from 'lucide-react';
@@ -7,23 +7,32 @@ const VerifyEmailPage = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const token = params.get('token');
-  const [status, setStatus] = useState('loading'); // loading | success | error
-  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState(token ? 'loading' : 'error');
+  const [message, setMessage] = useState(token ? '' : 'No verification token found.');
 
-  const fetchedRef = React.useRef(false);
+  const fetchedRef = useRef(false);
+
+  const verifyToken = async (verifyTokenValue) => {
+    try {
+      const res = await fetch(`/api/auth/verify/${verifyTokenValue}`);
+      const data = await res.json();
+      if (data.success) {
+        setStatus('success');
+        setMessage(data.message);
+      } else {
+        setStatus('error');
+        setMessage(data.error || 'Verification failed.');
+      }
+    } catch {
+      setStatus('error');
+      setMessage('Connection error.');
+    }
+  };
 
   useEffect(() => {
-    if (!token) { setStatus('error'); setMessage('No verification token found.'); return; }
-    if (fetchedRef.current) return;
+    if (!token || fetchedRef.current) return;
     fetchedRef.current = true;
-
-    fetch(`/api/auth/verify/${token}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) { setStatus('success'); setMessage(data.message); }
-        else { setStatus('error'); setMessage(data.error); }
-      })
-      .catch(() => { setStatus('error'); setMessage('Connection error.'); });
+    void verifyToken(token);
   }, [token]);
 
   return (
