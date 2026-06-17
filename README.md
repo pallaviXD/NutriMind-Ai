@@ -197,7 +197,8 @@ Open `.env` and fill in:
 JWT_SECRET=any_long_random_string_here
 PORT=3001
 CLIENT_URL=http://localhost:5173
-GROQ_API_KEY=gsk_your_groq_key_here
+# FIX: Added required VITE_ prefix to ensure proper environment resolution on the frontend
+VITE_GROQ_API_KEY=your_groq_api_key_here
 ```
 
 Getting a Groq API key (free, no credit card):
