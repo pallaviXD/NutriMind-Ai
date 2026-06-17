@@ -11,6 +11,7 @@ import Kitchen from './components/Kitchen';
 import Analytics from './components/Analytics';
 import HealthProfile from './components/HealthProfile';
 import Workouts from './components/Workouts';
+import SchedulePage from './pages/SchedulePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
@@ -94,6 +95,7 @@ const AppLayout = () => {
               <Routes location={location}>
                 <Route path="/"          element={<Dashboard />} />
                 <Route path="/kitchen"   element={<Kitchen />} />
+                <Route path="/schedule"  element={<SchedulePage />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/health"    element={<HealthProfile />} />
                 <Route path="/workouts"  element={<Workouts />} />

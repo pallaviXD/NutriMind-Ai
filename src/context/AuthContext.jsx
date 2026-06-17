@@ -6,21 +6,16 @@ export const useAuth = () => useContext(AuthContext);
 const API = '/api';
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const initialToken = typeof window !== 'undefined' ? localStorage.getItem('nm_token') : null;
+  const initialUser = () => {
+    if (typeof window === 'undefined') return null;
+    const saved = localStorage.getItem('nm_user');
+    return saved ? JSON.parse(saved) : null;
+  };
 
-  // Load from localStorage on boot
-  useEffect(() => {
-    const token = localStorage.getItem('nm_token');
-    const savedUser = localStorage.getItem('nm_user');
-    if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
-      fetchProfile(token);
-    } else {
-      setLoading(false);
-    }
-  }, []);
+  const [user, setUser] = useState(initialUser);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(!!initialToken);
 
   const fetchProfile = async (token) => {
     try {
@@ -38,6 +33,15 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
+
+  // Load from localStorage on boot
+  useEffect(() => {
+    if (!initialToken) return;
+    const init = async () => {
+      await fetchProfile(initialToken);
+    };
+    void init();
+  }, []);
 
   const getStats = async () => {
     const token = localStorage.getItem('nm_token');

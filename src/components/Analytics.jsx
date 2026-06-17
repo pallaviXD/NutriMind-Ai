@@ -4,29 +4,28 @@ import { Activity, Zap, TrendingUp, Flame, Award, Calendar, Loader2 } from 'luci
 import { useAuth } from '../context/AuthContext';
 
 const Analytics = () => {
-  const { profile } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(7);
 
   useEffect(() => {
+    const fetchAnalytics = async () => {
+      setLoading(true);
+      const token = localStorage.getItem('nm_token');
+      try {
+        const res = await fetch(`/api/user/analytics?days=${days}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const d = await res.json();
+        setData(d);
+      } catch (e) { console.error(e); }
+      setLoading(false);
+    };
+
     fetchAnalytics();
   }, [days]);
 
-  const fetchAnalytics = async () => {
-    setLoading(true);
-    const token = localStorage.getItem('nm_token');
-    try {
-      const res = await fetch(`/api/user/analytics?days=${days}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const d = await res.json();
-      setData(d);
-    } catch (e) { console.error(e); }
-    setLoading(false);
-  };
-
-  const tooltipStyle = { backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fafafa' };
+  const tooltipStyle = { backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fafafa' }; 
 
   if (loading) return (
     <div className="h-full flex items-center justify-center">
@@ -40,7 +39,6 @@ const Analytics = () => {
   const hasData = data?.dailyTotals?.length > 0;
   const avgCalories = hasData ? Math.round(data.dailyTotals.reduce((s, d) => s + d.calories, 0) / data.dailyTotals.length) : 0;
   const avgProtein = hasData ? Math.round(data.dailyTotals.reduce((s, d) => s + d.protein, 0) / data.dailyTotals.length) : 0;
-  const targetCals = profile?.health_goal === 'gym' ? 2800 : profile?.health_goal === 'weight_loss' ? 1600 : 2200;
 
   return (
     <div className="h-full p-6 flex flex-col gap-6 overflow-y-auto" role="main" aria-label="Analytics Dashboard">

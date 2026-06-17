@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useMemo } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Heart, Dumbbell, Activity, Pill, Sliders, CheckCircle2, User, Brain, ShieldAlert, Apple, Ban, Loader2, Save, Sparkles } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalContext';
 import { useAuth } from '../context/AuthContext';
@@ -31,21 +31,20 @@ const HealthProfile = () => {
 
   // Load existing profile data
   useEffect(() => {
-    if (profile) {
-      setDetails({
-        height_cm: profile.height_cm || '',
-        weight_kg: profile.weight_kg || '',
-        gender: profile.gender || 'male',
-        date_of_birth: profile.date_of_birth || '',
-        activity_level: profile.activity_level || 'moderate',
-        neck_cm: profile.neck_cm || '',
-        waist_cm: profile.waist_cm || '',
-        hip_cm: profile.hip_cm || '',
-        health_conditions: profile.health_conditions
-          ? (typeof profile.health_conditions === 'string' ? JSON.parse(profile.health_conditions) : profile.health_conditions)
-          : [],
-      });
-    }
+    if (!profile) return;
+    setDetails({
+      height_cm: profile.height_cm || '',
+      weight_kg: profile.weight_kg || '',
+      gender: profile.gender || 'male',
+      date_of_birth: profile.date_of_birth || '',
+      activity_level: profile.activity_level || 'moderate',
+      neck_cm: profile.neck_cm || '',
+      waist_cm: profile.waist_cm || '',
+      hip_cm: profile.hip_cm || '',
+      health_conditions: profile.health_conditions
+        ? (typeof profile.health_conditions === 'string' ? JSON.parse(profile.health_conditions) : profile.health_conditions)
+        : [],
+    });
   }, [profile]);
 
   const set = (k, v) => setDetails(d => ({ ...d, [k]: v }));
@@ -68,8 +67,13 @@ const HealthProfile = () => {
     : bmi < 30   ? { t: 'Overweight', c: 'text-yellow-400' }
     : { t: 'Obese', c: 'text-red-400' } : null;
 
-  const age = details.date_of_birth
-    ? Math.floor((Date.now() - new Date(details.date_of_birth)) / (365.25 * 24 * 3600 * 1000)) : null;
+  const [today] = useState(() => new Date());
+
+  const age = useMemo(() => {
+    if (!details.date_of_birth) return null;
+    const birthDate = new Date(details.date_of_birth).getTime();
+    return Math.floor((today.getTime() - birthDate) / (365.25 * 24 * 3600 * 1000));
+  }, [details.date_of_birth, today]);
 
   const handleSaveDetails = async () => {
     setSavingDetails(true);

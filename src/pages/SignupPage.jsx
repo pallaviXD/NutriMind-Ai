@@ -5,7 +5,7 @@ import { Activity, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from 'lucid
 import { useAuth } from '../context/AuthContext';
 
 const SignupPage = () => {
-  const { signup, login } = useAuth();
+  const { signup } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [showPass, setShowPass] = useState(false);

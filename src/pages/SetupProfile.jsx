@@ -19,6 +19,11 @@ const SetupProfile = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [maxDOB] = useState(() => {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() - 10);
+    return date.toISOString().split('T')[0];
+  });
   const [data, setData] = useState({
     gender: 'male', height_cm: '', weight_kg: '',
     date_of_birth: '', health_goal: 'general', activity_level: 'moderate',
@@ -111,7 +116,7 @@ const SetupProfile = () => {
                 <div>
                   <label className="text-xs font-semibold text-muted uppercase tracking-wider block mb-2">Date of Birth</label>
                   <input type="date" value={data.date_of_birth} onChange={e => set('date_of_birth', e.target.value)}
-                    max={new Date(Date.now() - 10 * 365.25 * 24 * 3600 * 1000).toISOString().split('T')[0]}
+                    max={maxDOB}
                     className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-accent-neon/60 focus:ring-1 focus:ring-accent-neon/30 transition-all"
                   />
                 </div>

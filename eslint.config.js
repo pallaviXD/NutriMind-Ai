@@ -24,6 +24,20 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
+    files: ['server/**/*.{js,jsx}'],
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+      },
+      globals: globals.node,
+    },
+    rules: {
+      'no-undef': 'error',
     },
   },
 ])

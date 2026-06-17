@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BrainCircuit, AlertTriangle, TrendingUp, PieChart as PieChartIcon, Droplets, Scale } from 'lucide-react';
 import { LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { useAuth } from '../context/AuthContext';
 
 const RightPanel = ({ state, isAnalyzing }) => {
   const { insights, riskLevel, charts } = state;
-  const { profile } = useAuth();
   const [water, setWater] = useState(0);
   const [weight, setWeight] = useState('');
   const [weightSaved, setWeightSaved] = useState(false);

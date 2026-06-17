@@ -7,6 +7,7 @@ import { useGlobalState } from '../context/GlobalContext';
 const NAV_ITEMS = [
   { to: '/',          icon: <LayoutDashboard size={20} />, label: 'Command Center' },
   { to: '/kitchen',   icon: <ChefHat size={20} />,         label: 'AI Kitchen' },
+  { to: '/schedule',  icon: <Clock className="" size={20} />,         label: 'Schedule' },
   { to: '/workouts',  icon: <Dumbbell size={20} />,         label: 'Workouts' },
   { to: '/analytics', icon: <LineChart size={20} />,        label: 'Analytics' },
   { to: '/health',    icon: <HeartPulse size={20} />,       label: 'Health Profile' },

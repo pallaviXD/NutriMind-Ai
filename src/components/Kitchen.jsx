@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ChefHat, Sparkles, ShoppingCart, RefreshCw, Clock, Flame, Zap, Plus, X } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalContext';
 import { useAuth } from '../context/AuthContext';

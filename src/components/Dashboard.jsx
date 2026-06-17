@@ -2,6 +2,7 @@ import React from 'react';
 import LeftPanel from './LeftPanel';
 import CenterPanel from './CenterPanel';
 import RightPanel from './RightPanel';
+import SchedulePanel from './SchedulePanel';
 import { useGlobalState } from '../context/GlobalContext';
 
 const Dashboard = () => {
@@ -20,8 +21,9 @@ const Dashboard = () => {
           <CenterPanel state={state} isAnalyzing={state.isAnalyzing} />
         </section>
 
-        {/* Right: AI Intelligence */}
+        {/* Right: AI Intelligence + Schedule */}
         <section className="lg:col-span-3 flex flex-col min-h-0 overflow-y-auto">
+          <SchedulePanel />
           <RightPanel state={state} isAnalyzing={state.isAnalyzing} />
         </section>
       </div>

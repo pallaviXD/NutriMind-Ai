@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dumbbell, ChevronDown, ChevronUp, Clock, Flame, RepeatIcon, Sparkles, RefreshCw, History, ArrowLeft, Calendar, Zap, Loader2, AlertCircle } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalContext';
@@ -109,26 +109,28 @@ const Workouts = () => {
   const token = localStorage.getItem('nm_token');
 
   // Fetch the latest plan on mount
-  const fetchLatest = useCallback(async () => {
-    try {
-      const res = await fetch('/api/user/workout-plan/latest', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (data.success && data.plan) {
-        setCurrentPlan(data.plan);
-        setPlanMeta({ version: data.version, createdAt: data.createdAt, cached: true });
-      }
-    } catch (err) {
-      console.error('Failed to fetch latest plan:', err);
-    } finally {
-      setHasLoaded(true);
-    }
-  }, [token]);
-
   useEffect(() => {
-    fetchLatest();
-  }, [fetchLatest]);
+    let active = true;
+    const fetchLatest = async () => {
+      try {
+        const res = await fetch('/api/user/workout-plan/latest', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!active) return;
+        if (data.success && data.plan) {
+          setCurrentPlan(data.plan);
+          setPlanMeta({ version: data.version, createdAt: data.createdAt, cached: true });
+        }
+      } catch (err) {
+        if (active) console.error('Failed to fetch latest plan:', err);
+      } finally {
+        if (active) setHasLoaded(true);
+      }
+    };
+    void fetchLatest();
+    return () => { active = false; };
+  }, [token]);
 
   // Generate a new plan via AI
   const generatePlan = async (forceRegenerate = false) => {

@@ -1,9 +1,74 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { simulateLocalAI } from '../services/aiService';
 
 const GlobalContext = createContext();
 
 export const useGlobalState = () => useContext(GlobalContext);
+
+const setTodayTime = (hours, minutes) => {
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+  return date;
+};
+
+const createSchedule = (profile) => {
+  const now = new Date();
+  const goal = profile?.goal || 'general';
+  const isGymGoal = goal === 'gym';
+  const scheduleItems = [
+    {
+      id: 'wake', title: 'Wake Up', time: setTodayTime(7, 0), priority: 'High',
+      details: 'Start your day with a glass of water and set your intentions.',
+      actionLabel: 'Acknowledge',
+    },
+    {
+      id: 'hydration', title: 'Hydration Reminder', time: setTodayTime(7, 15), priority: 'Medium',
+      details: 'Drink 1–2 glasses of water to support digestion and energy.',
+      actionLabel: 'Log water',
+    },
+    {
+      id: 'breakfast', title: 'Breakfast', time: setTodayTime(8, 0), priority: 'High',
+      details: 'Fuel up with a balanced meal aligned with your calorie target.',
+      actionLabel: 'View breakfast',
+    },
+    {
+      id: 'snack', title: 'Healthy Snack', time: setTodayTime(11, 0), priority: 'Low',
+      details: 'Choose a protein-rich snack to stay steady until lunch.',
+      actionLabel: 'Log snack',
+    },
+    {
+      id: 'lunch', title: 'Lunch', time: setTodayTime(13, 30), priority: 'High',
+      details: 'Aim for a nutrient-dense lunch to support afternoon focus.',
+      actionLabel: 'View lunch',
+    },
+    {
+      id: 'workout', title: 'Workout Session', time: setTodayTime(isGymGoal ? 18 : 17, 45), priority: isGymGoal ? 'High' : 'Medium',
+      details: 'Complete your planned movement session for strength and energy.',
+      actionLabel: 'Start workout',
+    },
+    {
+      id: 'dinner', title: 'Dinner', time: setTodayTime(20, 0), priority: 'Medium',
+      details: 'Finish your day with a light, balanced dinner and recovery support.',
+      actionLabel: 'View dinner',
+    },
+    {
+      id: 'winddown', title: 'Sleep Preparation', time: setTodayTime(22, 30), priority: 'Low',
+      details: 'Begin winding down to improve sleep quality and recovery.',
+      actionLabel: 'Prep for sleep',
+    },
+  ];
+
+  return scheduleItems.map(item => {
+    const lateThreshold = 30 * 60 * 1000;
+    const isLate = now - item.time > lateThreshold;
+    const defaultStatus = now > item.time && isLate ? 'missed' : 'pending';
+    return {
+      ...item,
+      status: defaultStatus,
+      notified: false,
+    };
+  });
+};
 
 // Quick actions map to natural-language strings the AI can parse
 const QUICK_ACTION_MAP = {
@@ -40,6 +105,8 @@ export const GlobalProvider = ({ children }) => {
     'Eggs (12)', 'Oats (500g)', 'Whey Protein', 'Olive Oil',
     'Greek Yogurt', 'Avocado (2)'
   ]);
+
+  const [schedule, setSchedule] = useState(createSchedule(null));
 
   // Single source of truth for ALL chat messages (shared across Left Panel + context)
   const [chatHistory, setChatHistory] = useState([
@@ -172,6 +239,70 @@ export const GlobalProvider = ({ children }) => {
     }]);
   };
 
+  const notifyInApp = (message) => {
+    setChatHistory(prev => [...prev, { role: 'system', text: `🔔 ${message}` }]);
+  };
+
+  const notifyBrowser = (title, message) => {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'granted') {
+      new Notification(title, { body: message, icon: '/logo192.png' });
+    }
+  };
+
+  useEffect(() => {
+    if (Notification.permission === 'default') {
+      Notification.requestPermission().catch(() => null);
+    }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSchedule(prev => prev.map(item => {
+        const now = new Date();
+        if (item.status !== 'pending') return item;
+
+        const targetTime = item.time;
+        const minutesUntil = Math.round((targetTime - now) / 60000);
+        if (minutesUntil <= 15 && minutesUntil >= 0 && !item.notified) {
+          notifyInApp(`Your planned ${item.title.toLowerCase()} starts in ${minutesUntil} minutes.`);
+          notifyBrowser('NutriMind Reminder', `Your planned ${item.title.toLowerCase()} starts in ${minutesUntil} minutes.`);
+          return { ...item, notified: true };
+        }
+
+        if (now > new Date(targetTime.getTime() + 30 * 60000) && !item.notified && item.status === 'pending') {
+          notifyInApp(`You missed your planned ${item.title.toLowerCase()}. You can still complete it or adjust your day.`);
+          notifyBrowser('NutriMind Reminder', `You missed your planned ${item.title.toLowerCase()}.`);
+          return { ...item, status: 'missed', notified: true };
+        }
+
+        return item;
+      }));
+    }, 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    setSchedule(createSchedule(healthProfile));
+  }, [healthProfile]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  const completeScheduleItem = (itemId) => {
+    setSchedule(prev => {
+      const updated = prev.map(item => item.id === itemId ? { ...item, status: 'completed' } : item);
+      const completedItem = prev.find(item => item.id === itemId);
+      if (completedItem) {
+        notifyInApp(`Nice work! ${completedItem.title} is marked complete.`);
+        notifyBrowser('NutriMind', `${completedItem.title} completed.`);
+      }
+      return updated;
+    });
+  };
+
+  const regenerateSchedule = () => setSchedule(createSchedule(healthProfile, calories, meals, macros));
+
   const charts = {
     consistency: [
       { day: 'Mon', value: 80 },
@@ -192,8 +323,9 @@ export const GlobalProvider = ({ children }) => {
     <GlobalContext.Provider value={{
       isAnalyzing, profileLabel, riskLevel, dailyCompletion,
       calories, macros, meals, pantry, chatHistory, insights, charts,
-      healthProfile,
-      processUserInput, setPantry, applyHealthProfile
+      healthProfile, schedule,
+      processUserInput, setPantry, applyHealthProfile,
+      completeScheduleItem, regenerateSchedule
     }}>
       {children}
     </GlobalContext.Provider>
