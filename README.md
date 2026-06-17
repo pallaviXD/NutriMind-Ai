@@ -278,7 +278,7 @@ After deployment, Cloud Run gives you a URL like:
 | `GROQ_API_KEY` | Yes | Groq API key for Llama 3.3 70B. Get free at console.groq.com |
 | `PORT` | No | Server port. Defaults to 3001. Cloud Run sets this automatically. |
 | `NODE_ENV` | No | Set to `production` to enable static file serving and CORS for all origins. |
-| `CLIENT_URL` | No | Frontend URL for email links. Defaults to http://localhost:5175 |
+| `CLIENT_URL` | No | Frontend URL for email links. Defaults to http://localhost:5173 |
 | `EMAIL_USER` | No | Gmail address for sending emails (optional feature) |
 | `EMAIL_PASS` | No | Gmail App Password (optional feature) |
 
