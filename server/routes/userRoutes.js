@@ -189,7 +189,9 @@ router.get('/stats', (req, res) => {
 // ─── POST /api/user/weight-log ────────────────────────────────────────────────
 router.post('/weight-log', (req, res) => {
   const { weight_kg, notes } = req.body;
-  if (!weight_kg) return res.status(400).json({ error: 'Weight is required.' });
+if (!weight_kg || weight_kg < 20 || weight_kg > 500) {
+  return res.status(400).json({ error: 'Invalid weight. Must be between 20kg and 500kg.' });
+}
   
   db.prepare('INSERT INTO weight_logs (user_id, weight_kg, notes) VALUES (?, ?, ?)')
     .run(req.user.id, weight_kg, notes || null);
@@ -524,7 +526,7 @@ router.post('/water-log', (req, res) => {
     // (If the user is adding to their total, use `water_intake = water_intake + ?`)
     db.prepare(`
       UPDATE profiles 
-      SET water_intake = ?, updated_at = unixepoch() 
+      SET water_intake = water_intake + ?, updated_at = unixepoch() 
       WHERE user_id = ?
     `).run(glasses, req.user.id);
     
