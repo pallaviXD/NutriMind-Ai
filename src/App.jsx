@@ -11,6 +11,7 @@ import Kitchen from './components/Kitchen';
 import Analytics from './components/Analytics';
 import HealthProfile from './components/HealthProfile';
 import Workouts from './components/Workouts';
+import Community from './components/Community';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
@@ -96,7 +97,8 @@ const AppLayout = () => {
                 <Route path="/kitchen"   element={<Kitchen />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/health"    element={<HealthProfile />} />
-                <Route path="/workouts"  element={<Workouts />} />
+                <Route path="/workouts"   element={<Workouts />} />
+                <Route path="/community" element={<Community />} />
               </Routes>
             </FramerMotion.div>
           </AnimatePresence>

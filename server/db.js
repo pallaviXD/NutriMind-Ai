@@ -74,6 +74,52 @@ db.exec(`
   );
 
   CREATE INDEX IF NOT EXISTS idx_wp_user_hash ON workout_plans(user_id, request_hash);
+
+  CREATE TABLE IF NOT EXISTS friend_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    receiver_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    status TEXT NOT NULL DEFAULT 'pending',
+    created_at INTEGER DEFAULT (unixepoch()),
+    updated_at INTEGER DEFAULT (unixepoch()),
+    UNIQUE(sender_id, receiver_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS community_challenges (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    creator_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    goal_type TEXT NOT NULL,
+    goal_value INTEGER NOT NULL,
+    start_date INTEGER NOT NULL,
+    end_date INTEGER NOT NULL,
+    is_active INTEGER DEFAULT 1,
+    created_at INTEGER DEFAULT (unixepoch())
+  );
+
+  CREATE TABLE IF NOT EXISTS challenge_participants (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    challenge_id INTEGER NOT NULL REFERENCES community_challenges(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    progress INTEGER DEFAULT 0,
+    completed INTEGER DEFAULT 0,
+    joined_at INTEGER DEFAULT (unixepoch()),
+    UNIQUE(challenge_id, user_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS activity_shares (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    share_type TEXT NOT NULL,
+    content TEXT NOT NULL,
+    visibility TEXT NOT NULL DEFAULT 'friends',
+    created_at INTEGER DEFAULT (unixepoch())
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_fr_receiver ON friend_requests(receiver_id, status);
+  CREATE INDEX IF NOT EXISTS idx_cp_challenge ON challenge_participants(challenge_id);
+  CREATE INDEX IF NOT EXISTS idx_shares_user ON activity_shares(user_id, created_at);
 `);
 
 export default db;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Activity, LayoutDashboard, ChefHat, LineChart, HeartPulse, Dumbbell, LogOut } from 'lucide-react';
+import { Activity, LayoutDashboard, ChefHat, LineChart, HeartPulse, Dumbbell, Users, LogOut } from 'lucide-react';
 import { motion as FramerMotion } from 'framer-motion';
 import { useGlobalState } from '../context/GlobalContext';
 
@@ -9,7 +9,8 @@ const NAV_ITEMS = [
   { to: '/kitchen',   icon: <ChefHat size={20} />,         label: 'AI Kitchen' },
   { to: '/workouts',  icon: <Dumbbell size={20} />,         label: 'Workouts' },
   { to: '/analytics', icon: <LineChart size={20} />,        label: 'Analytics' },
-  { to: '/health',    icon: <HeartPulse size={20} />,       label: 'Health Profile' },
+  { to: '/health',     icon: <HeartPulse size={20} />,  label: 'Health Profile' },
+  { to: '/community',  icon: <Users size={20} />,       label: 'Community' },
 ];
 
 const Sidebar = ({ onLogout, isExpanded = true }) => {
