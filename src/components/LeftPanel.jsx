@@ -75,7 +75,7 @@ const LeftPanel = () => {
   };
 
   return (
-    <div className="glass-panel flex flex-col h-full overflow-hidden">
+    <div className="glass-panel flex flex-col h-full w-full overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b border-border/50 shrink-0">
         <h2 className="text-base font-bold flex items-center gap-2">
@@ -106,7 +106,7 @@ const LeftPanel = () => {
       </div>
 
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 flex flex-col gap-3">
         {chatHistory.map((msg, idx) => {
           const isUser   = msg.role === 'user';
           const isSystem = msg.role === 'system';
@@ -126,7 +126,7 @@ const LeftPanel = () => {
                 ${isUser ? 'bg-accent-neon text-background' : 'bg-panel border border-border text-accent-purple'}`}>
                 {isUser ? <User size={13} /> : <Bot size={13} />}
               </div>
-              <div className={`px-3 py-2 rounded-2xl text-xs leading-relaxed max-w-[82%] whitespace-pre-line
+              <div className={`px-3 py-2 rounded-2xl text-xs leading-relaxed max-w-[92%] break-words whitespace-pre-line
                 ${isUser
                   ? 'bg-accent-neon/10 border border-accent-neon/20 text-accent-neon rounded-br-sm'
                   : 'bg-panel border border-border text-foreground/90 rounded-bl-sm'}`}>
@@ -163,7 +163,7 @@ const LeftPanel = () => {
             </p>
             {suggestions.map((s, i) => (
               <button key={i} onClick={() => handleSuggestion(s)} disabled={isAnalyzing}
-                className="text-left text-xs text-muted/80 hover:text-accent-neon bg-background/40 hover:bg-accent-neon/5 border border-border/50 hover:border-accent-neon/30 rounded-lg px-3 py-1.5 transition-all truncate"
+                className="text-left text-xs text-muted/80 hover:text-accent-neon bg-background/40 hover:bg-accent-neon/5 border border-border/50 hover:border-accent-neon/30 rounded-lg px-3 py-1.5 transition-all break-words whitespace-normal"
               >
                 {s}
               </button>
