@@ -11,12 +11,12 @@ const Dashboard = () => {
     <div className="h-full p-4 flex flex-col gap-4 overflow-hidden">
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-0">
         {/* Left: AI Chat + Quick Actions */}
-        <section className="lg:col-span-3 flex flex-col min-h-0">
+        <section className="lg:col-span-4 flex flex-col min-h-0">
           <LeftPanel />
         </section>
 
         {/* Center: Live Diet Engine */}
-        <section className="lg:col-span-6 flex flex-col min-h-0 overflow-y-auto">
+        <section className="lg:col-span-5 flex flex-col min-h-0 overflow-y-auto">
           <CenterPanel state={state} isAnalyzing={state.isAnalyzing} />
         </section>
 
