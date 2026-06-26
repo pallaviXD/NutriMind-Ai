@@ -5,11 +5,11 @@ import { motion as FramerMotion } from 'framer-motion';
 import { useGlobalState } from '../context/GlobalContext';
 
 const NAV_ITEMS = [
-  { to: '/',          icon: <LayoutDashboard size={20} />, label: 'Command Center' },
-  { to: '/kitchen',   icon: <ChefHat size={20} />,         label: 'AI Kitchen' },
-  { to: '/workouts',  icon: <Dumbbell size={20} />,         label: 'Workouts' },
-  { to: '/analytics', icon: <LineChart size={20} />,        label: 'Analytics' },
-  { to: '/health',    icon: <HeartPulse size={20} />,       label: 'Health Profile' },
+  { to: '/app',          icon: <LayoutDashboard size={20} />, label: 'Command Center' },
+  { to: '/app/kitchen',  icon: <ChefHat size={20} />,         label: 'AI Kitchen' },
+  { to: '/app/workouts', icon: <Dumbbell size={20} />,         label: 'Workouts' },
+  { to: '/app/analytics',icon: <LineChart size={20} />,        label: 'Analytics' },
+  { to: '/app/health',   icon: <HeartPulse size={20} />,       label: 'Health Profile' },
 ];
 
 const Sidebar = ({ onLogout, isExpanded = true }) => {

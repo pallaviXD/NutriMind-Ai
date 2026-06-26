@@ -15,6 +15,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import SetupProfile from './pages/SetupProfile';
+import LandingPage from './pages/LandingPage';
 
 // Protect routes — redirects to /login if not authed
 const ProtectedRoute = ({ children }) => {
@@ -92,11 +93,12 @@ const AppLayout = () => {
           <AnimatePresence mode="wait">
             <FramerMotion.div key={location.pathname} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.22 }} className="h-full">
               <Routes location={location}>
-                <Route path="/"          element={<Dashboard />} />
-                <Route path="/kitchen"   element={<Kitchen />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/health"    element={<HealthProfile />} />
-                <Route path="/workouts"  element={<Workouts />} />
+                <Route path="/app"           element={<Dashboard />} />
+                <Route path="/app/kitchen"   element={<Kitchen />} />
+                <Route path="/app/analytics" element={<Analytics />} />
+                <Route path="/app/health"    element={<HealthProfile />} />
+                <Route path="/app/workouts"  element={<Workouts />} />
+                <Route path="*"              element={<Dashboard />} />
               </Routes>
             </FramerMotion.div>
           </AnimatePresence>
@@ -113,6 +115,7 @@ function App() {
         <Router>
           <Routes>
             {/* Public routes */}
+            <Route path="/"               element={<LandingPage />} />
             <Route path="/login"          element={<LoginPage />} />
             <Route path="/signup"         element={<SignupPage />} />
             <Route path="/verify-email"   element={<VerifyEmailPage />} />
@@ -120,7 +123,7 @@ function App() {
               <ProtectedRoute><SetupProfile /></ProtectedRoute>
             } />
             {/* Protected app routes */}
-            <Route path="/*" element={
+            <Route path="/app/*" element={
               <ProtectedRoute>
                 <AppLayout />
               </ProtectedRoute>
