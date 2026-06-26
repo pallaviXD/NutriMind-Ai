@@ -18,7 +18,8 @@ RUN npm run build
 # Strip dev dependencies, then rebuild native modules for the production runtime
 RUN npm prune --production && npm rebuild better-sqlite3
 
-EXPOSE 8080
+# PORT is set by the platform (Render: 10000, Cloud Run: 8080, local: 3001)
+EXPOSE ${PORT:-8080}
 
 ENV NODE_ENV=production
 
