@@ -3,7 +3,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = path.join(__dirname, 'nutrimind.db');
+
+// DB_PATH env var lets you mount a persistent volume on Cloud Run.
+// Default: same directory as this file (in-container, wiped on redeploy).
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'nutrimind.db');
 
 const db = new Database(DB_PATH);
 
@@ -74,6 +77,14 @@ db.exec(`
   );
 
   CREATE INDEX IF NOT EXISTS idx_wp_user_hash ON workout_plans(user_id, request_hash);
+
+  CREATE TABLE IF NOT EXISTS water_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    glasses INTEGER NOT NULL DEFAULT 0,
+    logged_date TEXT NOT NULL DEFAULT (date('now')),
+    UNIQUE(user_id, logged_date)
+  );
 `);
 
 export default db;

@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import db from '../db.js';
 import { signToken } from '../auth.js';
-import { sendVerificationEmail } from '../mailer.js';
+import { sendVerificationEmail, sendWelcomeEmail } from '../mailer.js';
 
 const router = express.Router();
 
@@ -57,18 +57,27 @@ router.post('/signup', async (req, res) => {
 router.get('/verify/:token', async (req, res) => {
   try {
     const { token } = req.params;
-    const user = db.prepare('SELECT id, verify_token_expires FROM users WHERE verify_token = ?').get(token);
-    
+    if (!token) return res.status(400).json({ success: false, error: 'Verification token is missing.' });
+
+    const user = db.prepare('SELECT id, name, email, is_verified, verify_token_expires FROM users WHERE verify_token = ?').get(token);
+
     if (!user) {
       return res.status(400).json({ success: false, error: 'Invalid verification token.' });
     }
-    
+
+    if (user.is_verified) {
+      return res.json({ success: true, message: 'Email already verified. You can sign in.' });
+    }
+
     if (user.verify_token_expires < Date.now()) {
-      return res.status(400).json({ success: false, error: 'Verification token has expired.' });
+      return res.status(400).json({ success: false, error: 'Verification token has expired. Please sign up again.' });
     }
 
     db.prepare('UPDATE users SET is_verified = 1, verify_token = NULL, verify_token_expires = NULL WHERE id = ?').run(user.id);
-    
+
+    // Send welcome email async — don't block the response
+    sendWelcomeEmail(user.name, user.email).catch(console.error);
+
     res.json({ success: true, message: 'Email verified successfully. You can now log in.' });
   } catch (err) {
     console.error('Verify error:', err);

@@ -515,24 +515,23 @@ router.get('/analytics', (req, res) => {
 });
 
 // ─── POST /api/user/water-log ─────────────────────────────────────────────────
-// Inside server/routes/userRoutes.js
 router.post('/water-log', (req, res) => {
   const { glasses } = req.body;
-  
-  try {
-    // Fix: Save the 'glasses' payload to the database alongside the timestamp.
-    // (If the user is adding to their total, use `water_intake = water_intake + ?`)
-    db.prepare(`
-      UPDATE profiles 
-      SET water_intake = ?, updated_at = unixepoch() 
-      WHERE user_id = ?
-    `).run(glasses, req.user.id);
-    
-    res.json({ success: true, glasses });
-  } catch (error) {
-    console.error("Error logging water intake:", error);
-    res.status(500).json({ success: false, error: "Failed to log water intake." });
-  }
+  if (glasses === undefined || glasses === null) return res.status(400).json({ error: 'glasses is required.' });
+  const today = new Date().toISOString().split('T')[0];
+  db.prepare(`
+    INSERT INTO water_logs (user_id, glasses, logged_date)
+    VALUES (?, ?, ?)
+    ON CONFLICT(user_id, logged_date) DO UPDATE SET glasses = excluded.glasses
+  `).run(req.user.id, Math.max(0, parseInt(glasses) || 0), today);
+  res.json({ success: true, glasses });
+});
+
+// ─── GET /api/user/water-log ──────────────────────────────────────────────────
+router.get('/water-log', (req, res) => {
+  const today = new Date().toISOString().split('T')[0];
+  const log = db.prepare('SELECT glasses FROM water_logs WHERE user_id = ? AND logged_date = ?').get(req.user.id, today);
+  res.json({ glasses: log?.glasses ?? 0 });
 });
 
 export default router;

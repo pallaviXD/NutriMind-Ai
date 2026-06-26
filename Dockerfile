@@ -7,18 +7,15 @@ WORKDIR /app
 
 COPY package*.json ./
 
-# Install all deps and rebuild native modules for this platform
+# Install all deps (including devDeps needed for Vite build)
 RUN npm ci
 
 COPY . .
 
-# Build frontend
+# Build the React frontend
 RUN npm run build
 
-# Rebuild native modules for production
-RUN npm rebuild better-sqlite3
-
-# Remove dev deps
+# Strip dev dependencies, then rebuild native modules for the production runtime
 RUN npm prune --production && npm rebuild better-sqlite3
 
 EXPOSE 8080

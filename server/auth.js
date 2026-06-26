@@ -2,7 +2,11 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const SECRET = process.env.JWT_SECRET || 'nutrimind_fallback_secret';
+const SECRET = process.env.JWT_SECRET;
+if (!SECRET) {
+  console.error('❌ FATAL: JWT_SECRET environment variable is not set. Refusing to start.');
+  process.exit(1);
+}
 
 export const signToken = (payload) =>
   jwt.sign(payload, SECRET, { expiresIn: '7d' });
