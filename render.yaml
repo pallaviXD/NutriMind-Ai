@@ -5,28 +5,23 @@ services:
     plan: free
     region: oregon
 
-    # Auto-deploy on every push to main
     branch: main
     autoDeploy: true
-
-    # Persistent disk so SQLite data survives redeploys
-    disk:
-      name: nutrimind-db
-      mountPath: /data
-      sizeGB: 1
 
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 8080
-      - key: DB_PATH
-        value: /data/nutrimind.db
       - key: JWT_SECRET
-        generateValue: true          # Render auto-generates a secure random value
+        generateValue: true
       - key: GROQ_API_KEY
-        sync: false                  # You'll paste this in the Render dashboard
+        sync: false                  # Paste in Render dashboard
       - key: CLIENT_URL
         sync: false                  # Set to your Render URL after first deploy
+      - key: TURSO_DATABASE_URL
+        sync: false                  # Paste from Turso dashboard
+      - key: TURSO_AUTH_TOKEN
+        sync: false                  # Paste from Turso dashboard
 
     healthCheckPath: /api/health

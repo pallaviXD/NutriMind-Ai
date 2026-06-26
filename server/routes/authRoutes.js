@@ -21,7 +21,7 @@ router.post('/signup', async (req, res) => {
     if (!emailRegex.test(email))
       return res.status(400).json({ error: 'Invalid email address.' });
 
-    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase());
+    const existing = await db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase());
     if (existing)
       return res.status(409).json({ error: 'An account with this email already exists.' });
 
@@ -29,12 +29,12 @@ router.post('/signup', async (req, res) => {
     const verifyToken = crypto.randomBytes(32).toString('hex');
     const verifyExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
-    const { lastInsertRowid } = db.prepare(`
+    const { lastInsertRowid } = await db.prepare(`
       INSERT INTO users (name, email, password_hash, is_verified, verify_token, verify_token_expires)
       VALUES (?, ?, ?, 0, ?, ?)
     `).run(name.trim(), email.toLowerCase().trim(), hash, verifyToken, verifyExpires);
 
-    db.prepare('INSERT INTO profiles (user_id) VALUES (?)').run(lastInsertRowid);
+    await db.prepare('INSERT INTO profiles (user_id) VALUES (?)').run(lastInsertRowid);
 
     try {
       await sendVerificationEmail(name.trim(), email.toLowerCase().trim(), verifyToken);
@@ -45,7 +45,7 @@ router.post('/signup', async (req, res) => {
     res.json({
       success: true,
       requiresVerification: true,
-      message: 'Registration successful. Please check your email to verify your account.'
+      message: 'Registration successful. Please check your email to verify your account.',
     });
   } catch (err) {
     console.error('Signup error:', err);
@@ -59,21 +59,22 @@ router.get('/verify/:token', async (req, res) => {
     const { token } = req.params;
     if (!token) return res.status(400).json({ success: false, error: 'Verification token is missing.' });
 
-    const user = db.prepare('SELECT id, name, email, is_verified, verify_token_expires FROM users WHERE verify_token = ?').get(token);
+    const user = await db.prepare(
+      'SELECT id, name, email, is_verified, verify_token_expires FROM users WHERE verify_token = ?'
+    ).get(token);
 
-    if (!user) {
+    if (!user)
       return res.status(400).json({ success: false, error: 'Invalid verification token.' });
-    }
 
-    if (user.is_verified) {
+    if (user.is_verified)
       return res.json({ success: true, message: 'Email already verified. You can sign in.' });
-    }
 
-    if (user.verify_token_expires < Date.now()) {
+    if (user.verify_token_expires < Date.now())
       return res.status(400).json({ success: false, error: 'Verification token has expired. Please sign up again.' });
-    }
 
-    db.prepare('UPDATE users SET is_verified = 1, verify_token = NULL, verify_token_expires = NULL WHERE id = ?').run(user.id);
+    await db.prepare(
+      'UPDATE users SET is_verified = 1, verify_token = NULL, verify_token_expires = NULL WHERE id = ?'
+    ).run(user.id);
 
     // Send welcome email async — don't block the response
     sendWelcomeEmail(user.name, user.email).catch(console.error);
@@ -92,7 +93,7 @@ router.post('/login', async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ error: 'Email and password are required.' });
 
-    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase().trim());
+    const user = await db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase().trim());
     if (!user)
       return res.status(401).json({ error: 'Invalid email or password.' });
 
@@ -103,7 +104,7 @@ router.post('/login', async (req, res) => {
     if (!valid)
       return res.status(401).json({ error: 'Invalid email or password.' });
 
-    const profile = db.prepare('SELECT * FROM profiles WHERE user_id = ?').get(user.id);
+    const profile = await db.prepare('SELECT * FROM profiles WHERE user_id = ?').get(user.id);
     const profileComplete = !!(profile?.height_cm && profile?.weight_kg && profile?.health_goal !== 'general');
 
     const token = signToken({ id: user.id, email: user.email, name: user.name });

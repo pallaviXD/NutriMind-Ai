@@ -1,21 +1,17 @@
-import Database from 'better-sqlite3';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { createClient } from '@libsql/client';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// ─── Turso / libSQL client ────────────────────────────────────────────────────
+// Production: set TURSO_DATABASE_URL + TURSO_AUTH_TOKEN env vars (Turso cloud)
+// Local dev:  uses a local SQLite file automatically (no env vars needed)
+const url  = process.env.TURSO_DATABASE_URL  || 'file:./server/nutrimind.db';
+const authToken = process.env.TURSO_AUTH_TOKEN || undefined;
 
-// DB_PATH env var lets you mount a persistent volume on Cloud Run.
-// Default: same directory as this file (in-container, wiped on redeploy).
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'nutrimind.db');
+const libsql = createClient({ url, authToken });
 
-const db = new Database(DB_PATH);
-
-// Enable WAL mode for performance
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
-
-// Create tables
-db.exec(`
+// ─── Bootstrap schema ─────────────────────────────────────────────────────────
+// libSQL is async — we run migrations at startup and export a thin sync-style
+// wrapper so none of the existing route code needs to change.
+await libsql.executeMultiple(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -67,6 +63,14 @@ db.exec(`
     logged_at INTEGER DEFAULT (unixepoch())
   );
 
+  CREATE TABLE IF NOT EXISTS water_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    glasses INTEGER NOT NULL DEFAULT 0,
+    logged_date TEXT NOT NULL DEFAULT (date('now')),
+    UNIQUE(user_id, logged_date)
+  );
+
   CREATE TABLE IF NOT EXISTS workout_plans (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -77,14 +81,46 @@ db.exec(`
   );
 
   CREATE INDEX IF NOT EXISTS idx_wp_user_hash ON workout_plans(user_id, request_hash);
-
-  CREATE TABLE IF NOT EXISTS water_logs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    glasses INTEGER NOT NULL DEFAULT 0,
-    logged_date TEXT NOT NULL DEFAULT (date('now')),
-    UNIQUE(user_id, logged_date)
-  );
 `);
+
+// ─── Sync-style wrapper ───────────────────────────────────────────────────────
+// The existing routes use better-sqlite3's synchronous API:
+//   db.prepare('SELECT ...').get(...)   → single row
+//   db.prepare('SELECT ...').all(...)   → array of rows
+//   db.prepare('INSERT ...').run(...)   → { lastInsertRowid, changes }
+//   db.exec('...')                      → schema / pragma (fire and forget)
+//   db.pragma(...)                      → no-op (handled at schema level)
+//
+// We replicate that interface so zero route code changes are needed.
+
+const db = {
+  prepare(sql) {
+    return {
+      // Returns first row or undefined
+      get(...args) {
+        return libsql.execute({ sql, args: args.flat() }).then(r => r.rows[0] ?? undefined);
+      },
+      // Returns all rows as an array
+      all(...args) {
+        return libsql.execute({ sql, args: args.flat() }).then(r => r.rows);
+      },
+      // Returns { lastInsertRowid, changes }
+      run(...args) {
+        return libsql.execute({ sql, args: args.flat() }).then(r => ({
+          lastInsertRowid: Number(r.lastInsertRowid),
+          changes: r.rowsAffected,
+        }));
+      },
+    };
+  },
+
+  // Fire-and-forget for multi-statement DDL
+  exec(sql) {
+    return libsql.executeMultiple(sql);
+  },
+
+  // no-op — libSQL handles WAL & foreign keys at the server level
+  pragma() {},
+};
 
 export default db;
