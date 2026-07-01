@@ -266,3 +266,207 @@ export default function Features() {
     </section>
   );
 }
+
+{features.map((feature, index) => {
+  const Icon = feature.icon;
+
+  return (
+    <motion.div
+      key={feature.id}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{
+        duration: 0.6,
+        delay: index * 0.08,
+      }}
+      whileHover={{
+        y: -8,
+      }}
+      className={`
+        group
+        relative
+        overflow-hidden
+        rounded-[30px]
+        border
+        border-white/10
+        bg-gradient-to-b
+        from-white/5
+        to-white/[0.02]
+        backdrop-blur-xl
+        p-8
+        transition-all
+        duration-500
+        hover:border-cyan-400/40
+        hover:shadow-[0_20px_70px_rgba(34,211,238,.15)]
+        ${feature.size}
+      `}
+    >
+      {/* Hover Glow */}
+
+      <div
+        className={`
+          absolute
+          inset-0
+          opacity-0
+          transition-opacity
+          duration-500
+          group-hover:opacity-100
+          bg-gradient-to-br
+          ${feature.gradient}
+        `}
+        style={{
+          filter: "blur(120px)",
+        }}
+      />
+
+      {/* Top Border */}
+
+      <div
+        className={`
+          absolute
+          left-0
+          top-0
+          h-1
+          w-0
+          bg-gradient-to-r
+          ${feature.gradient}
+          transition-all
+          duration-500
+          group-hover:w-full
+        `}
+      />
+
+      <div className="relative z-10">
+
+        {/* Icon */}
+
+        <div
+          className={`
+            flex
+            h-16
+            w-16
+            items-center
+            justify-center
+            rounded-2xl
+            bg-gradient-to-br
+            ${feature.gradient}
+            shadow-lg
+          `}
+        >
+          <Icon
+            size={30}
+            className="text-white"
+          />
+        </div>
+
+        {/* Title */}
+
+        <h3
+          className="
+            mt-8
+            text-2xl
+            font-bold
+            text-white
+          "
+        >
+          {feature.title}
+        </h3>
+
+        {/* Description */}
+
+        <p
+          className="
+            mt-5
+            text-slate-400
+            leading-8
+            text-[16px]
+          "
+        >
+          {feature.description}
+        </p>
+
+        {/* Fake Mini Dashboard */}
+
+        <div
+          className="
+            mt-8
+            rounded-2xl
+            border
+            border-white/10
+            bg-black/20
+            p-5
+          "
+        >
+          <div className="flex items-center justify-between">
+
+            <span className="text-sm text-slate-400">
+
+              Today's Progress
+
+            </span>
+
+            <span className="text-sm font-semibold text-emerald-400">
+
+              +18%
+
+            </span>
+
+          </div>
+
+          <div className="mt-5 flex items-end gap-2 h-20">
+
+            {[35, 50, 40, 70, 55, 80, 65].map((value, i) => (
+
+              <motion.div
+                key={i}
+                initial={{
+                  height: 0,
+                }}
+                whileInView={{
+                  height: `${value}%`,
+                }}
+                transition={{
+                  delay: i * 0.08,
+                }}
+                className={`
+                  flex-1
+                  rounded-full
+                  bg-gradient-to-t
+                  ${feature.gradient}
+                `}
+              />
+
+            ))}
+
+          </div>
+
+        </div>
+
+        {/* Learn More */}
+
+        <button
+          className="
+            mt-8
+            inline-flex
+            items-center
+            gap-2
+            font-semibold
+            text-cyan-400
+            transition-all
+            duration-300
+            group-hover:gap-4
+          "
+        >
+          Learn More
+
+          <ArrowRight
+            size={18}
+          />
+
+        </button>
+
+      </div>
+    </motion.div>
+  );
+})}
