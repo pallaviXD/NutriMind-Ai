@@ -1,5 +1,13 @@
 import React, { useEffect, useRef } from 'react';
+import AuroraBackground from "../components/landing/AuroraBackground";
 
+<section className="relative min-h-screen overflow-hidden">
+
+    <AuroraBackground />
+
+    {/* Hero Content */}
+
+</section>
 const fragmentShaderSource = `#version 300 es
 precision highp float;
 out vec4 O;
