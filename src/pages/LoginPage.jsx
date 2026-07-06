@@ -27,7 +27,7 @@ const LoginPage = () => {
       if (data.error) {
         setError(data.error);
       } else {
-        navigate(data.profileComplete ? '/' : '/setup-profile');
+        navigate(data.profileComplete ? '/app' : '/setup-profile');
       }
     } catch {
       setError('Unable to sign in. Please check your network and try again.');

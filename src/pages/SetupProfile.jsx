@@ -50,7 +50,7 @@ const SetupProfile = () => {
       });
       await refreshProfile();
     } catch (e) { console.error(e); }
-    navigate('/');
+    navigate('/app');
   };
 
   return (

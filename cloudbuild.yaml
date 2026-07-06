@@ -13,7 +13,11 @@ steps:
       - '--region=us-central1'
       - '--platform=managed'
       - '--allow-unauthenticated'
-      - '--port=3001'
-      - '--set-env-vars=NODE_ENV=production,JWT_SECRET=$_JWT_SECRET,GROQ_API_KEY=$_GROQ_API_KEY'
+      - '--port=8080'
+      - '--memory=512Mi'
+      - '--cpu=1'
+      - '--min-instances=0'
+      - '--max-instances=10'
+      - '--set-env-vars=NODE_ENV=production,PORT=8080,JWT_SECRET=$_JWT_SECRET,GROQ_API_KEY=$_GROQ_API_KEY,CLIENT_URL=$_CLIENT_URL'
 images:
   - 'gcr.io/$PROJECT_ID/nutrimind-ai'
