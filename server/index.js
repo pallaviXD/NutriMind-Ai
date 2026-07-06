@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import workoutRoutes from './routes/workoutRoutes.js';
+import socialRoutes from './routes/socialRoutes.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -34,6 +35,7 @@ app.get('/api/health', (_, res) => res.json({ status: 'ok', ts: Date.now() }));
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/user', workoutRoutes);
+app.use('/api/social', socialRoutes);
 
 // Serve built frontend in production
 if (isProd) {

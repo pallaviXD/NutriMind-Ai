@@ -1,73 +1,67 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { Activity, LayoutDashboard, ChefHat, LineChart, HeartPulse, Dumbbell, LogOut } from 'lucide-react';
+import { LayoutDashboard, ChefHat, LineChart, Dumbbell, HeartPulse, Users, LogOut, Menu } from 'lucide-react';
 import { motion as FramerMotion } from 'framer-motion';
 import { useGlobalState } from '../context/GlobalContext';
 
 const NAV_ITEMS = [
-  { to: '/app',          icon: <LayoutDashboard size={20} />, label: 'Command Center' },
-  { to: '/app/kitchen',  icon: <ChefHat size={20} />,         label: 'AI Kitchen' },
-  { to: '/app/workouts', icon: <Dumbbell size={20} />,         label: 'Workouts' },
-  { to: '/app/analytics',icon: <LineChart size={20} />,        label: 'Analytics' },
-  { to: '/app/health',   icon: <HeartPulse size={20} />,       label: 'Health Profile' },
+  { to: '/',          icon: <LayoutDashboard size={20} />, label: 'Command Center' },
+  { to: '/kitchen',   icon: <ChefHat size={20} />,         label: 'AI Kitchen' },
+  { to: '/workouts',  icon: <Dumbbell size={20} />,         label: 'Workouts' },
+  { to: '/analytics', icon: <LineChart size={20} />,        label: 'Analytics' },
+  { to: '/health',    icon: <HeartPulse size={20} />,       label: 'Health Profile' },
+  { to: '/community', icon: <Users size={20} />,            label: 'Community' },
 ];
 
 const Sidebar = ({ onLogout, isExpanded = true }) => {
-  const { healthProfile } = useGlobalState();
+  const { user } = useGlobalState();
+
   return (
-    <div className={`w-16 ${isExpanded ? 'lg:w-60' : 'lg:w-16'} h-full bg-panel/80 backdrop-blur-xl border-r border-border flex flex-col transition-all duration-300 shrink-0 z-20`}
-      role="navigation" aria-label="Main navigation">
-      {/* Brand */}
-      <div className={`h-14 flex items-center justify-center ${isExpanded ? 'lg:justify-start lg:px-5' : ''} border-b border-border/50 shrink-0`}>
-        <Activity size={24} className="text-accent-neon shrink-0" />
-        <span className={`${isExpanded ? 'hidden lg:block' : 'hidden'} ml-2.5 font-bold text-base tracking-tight`}>
-          Nutri<span className="text-accent-purple">Mind</span>
-          <span className="text-xs text-muted font-normal ml-1">OS</span>
-        </span>
+    <FramerMotion.aside
+      initial={{ x: -250 }}
+      animate={{ x: 0 }}
+      transition={{ duration: 0.3 }}
+      className={`${isExpanded ? 'w-64' : 'w-20'} bg-gradient-to-b from-purple-900 to-black border-r border-purple-500/30 p-6 flex flex-col justify-between transition-all duration-300 overflow-y-auto`}
+    >
+      <div>
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            {isExpanded ? 'NutriMind' : 'NM'}
+          </h2>
+        </div>
+
+        <nav className="space-y-2">
+          {NAV_ITEMS.map((item) => (
+            <FramerMotion.a
+              key={item.to}
+              href={item.to}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-purple-500/20 transition-colors cursor-pointer group"
+              whileHover={{ x: 4 }}
+            >
+              <span className="text-purple-400 group-hover:text-pink-400 transition-colors">{item.icon}</span>
+              {isExpanded && <span className="text-sm font-medium">{item.label}</span>}
+            </FramerMotion.a>
+          ))}
+        </nav>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 py-4 flex flex-col gap-1 px-2 overflow-y-auto">
-        {NAV_ITEMS.map(item => (
-          <NavItem key={item.to} {...item} isExpanded={isExpanded} />
-        ))}
-      </nav>
-
-      {/* Profile indicator + logout */}
-      <div className="p-3 border-t border-border/50 space-y-2">
-        {healthProfile && (
-          <div className={`${isExpanded ? 'hidden lg:flex' : 'hidden'} items-center gap-2 px-2 py-1.5 rounded-xl bg-accent-neon/10 border border-accent-neon/20`}>
-            <HeartPulse size={12} className="text-accent-neon shrink-0" />
-            <span className="text-[10px] font-semibold text-accent-neon truncate capitalize">{healthProfile.goal?.replace('_', ' ')}</span>
-          </div>
-        )}
-        <button onClick={onLogout}
-          className="w-full flex items-center justify-center lg:justify-start gap-2.5 px-3 py-2.5 rounded-xl text-muted hover:text-red-400 hover:bg-red-400/10 transition-all text-sm"
+      <div className="border-t border-purple-500/30 pt-4">
+        <div className="flex items-center justify-between px-4 py-3 mb-4">
+          {isExpanded && (
+            <div>
+              <p className="text-sm font-semibold">{user?.name || 'User'}</p>
+              <p className="text-xs text-gray-400">{user?.email || 'user@nutrimmind.ai'}</p>
+            </div>
+          )}
+        </div>
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-500/20 text-red-400 transition-colors group"
+          whileHover={{ x: 4 }}
         >
-          <LogOut size={18} className="shrink-0" />
-          <span className={`${isExpanded ? 'hidden lg:block' : 'hidden'} font-medium`}>Sign Out</span>
+          <LogOut size={20} />
+          {isExpanded && <span className="text-sm font-medium">Logout</span>}
         </button>
       </div>
-    </div>
-  );
-};
-
-const NavItem = ({ to, icon, label, isExpanded }) => {
-  return (
-    <NavLink to={to} end={to === '/'}
-      className={({ isActive }) =>
-        `relative flex items-center justify-center ${isExpanded ? 'lg:justify-start' : ''} px-3 py-2.5 rounded-xl transition-all duration-200 group
-        ${isActive ? 'text-accent-neon bg-accent-neon/10 font-semibold' : 'text-muted hover:bg-panel hover:text-foreground'}`
-      }
-    >
-      {({ isActive }) => (
-        <>
-          {isActive && <FramerMotion.div layoutId="navIndicator" className="absolute left-0 top-1 bottom-1 w-0.5 bg-accent-neon rounded-r-full" initial={false} transition={{ type: 'spring', stiffness: 350, damping: 30 }} />}
-          <div className="shrink-0">{icon}</div>
-          <span className={`${isExpanded ? 'hidden lg:block' : 'hidden'} ml-3 text-sm truncate`}>{label}</span>
-        </>
-      )}
-    </NavLink>
+    </FramerMotion.aside>
   );
 };
 
