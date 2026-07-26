@@ -21,7 +21,9 @@ router.post('/signup', async (req, res) => {
     if (!emailRegex.test(email))
       return res.status(400).json({ error: 'Invalid email address.' });
 
-    const existing = await db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase());
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const existing = await db.prepare('SELECT id FROM users WHERE email = ?').get(normalizedEmail);
     if (existing)
       return res.status(409).json({ error: 'An account with this email already exists.' });
 
@@ -32,7 +34,7 @@ router.post('/signup', async (req, res) => {
     const { lastInsertRowid } = await db.prepare(`
       INSERT INTO users (name, email, password_hash, is_verified, verify_token, verify_token_expires)
       VALUES (?, ?, ?, 0, ?, ?)
-    `).run(name.trim(), email.toLowerCase().trim(), hash, verifyToken, verifyExpires);
+    `).run(name.trim(), normalizedEmail, hash, verifyToken, verifyExpires);
 
     await db.prepare('INSERT INTO profiles (user_id) VALUES (?)').run(lastInsertRowid);
 
