@@ -37,7 +37,7 @@ router.post('/signup', async (req, res) => {
     await db.prepare('INSERT INTO profiles (user_id) VALUES (?)').run(lastInsertRowid);
 
     try {
-      await sendVerificationEmail(name.trim(), email.toLowerCase().trim(), verifyToken);
+      await sendVerificationEmail(name.trim(), normalizedEmail, verifyToken);
     } catch (emailErr) {
       console.error('Failed to send verification email:', emailErr);
     }
