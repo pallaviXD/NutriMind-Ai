@@ -73,7 +73,7 @@ router.put('/profile', async (req, res) => {
   `).run(
     date_of_birth, gender, height_cm, weight_kg, body_fat_pct,
     neck_cm, waist_cm, hip_cm, activity_level, health_goal,
-    health_conditions ? JSON.stringify(health_conditions) : null,
+    health_conditions !== undefined ? JSON.stringify(health_conditions) : null,
     target_weight_kg,
     req.user.id,
   );
