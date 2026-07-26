@@ -225,7 +225,9 @@ router.post('/recipe', async (req, res) => {
   if (!apiKey) return res.status(503).json({ success: false, errorCode: 'AI_NOT_CONFIGURED', error: 'AI not configured.' });
 
   const profile    = await db.prepare('SELECT * FROM profiles WHERE user_id = ?').get(req.user.id);
-  const conditions = profile?.health_conditions && profile.health_conditions !== '[]' ? JSON.parse(profile.health_conditions) : [];
+  const conditions = profile?.health_conditions && profile.health_conditions !== '[]'
+    ? (() => { try { return JSON.parse(profile.health_conditions); } catch { return []; } })()
+    : [];
 
   const prompt = `You are an expert nutritionist and chef. Create a detailed ${mealType} recipe using: ${pantry.join(', ')}.
 Constraints: ~${Math.min(calsLeft, 700)} kcal, at least ${Math.min(proteinLeft, 40)}g protein, goal: ${goal}, conditions: ${conditions.length ? conditions.join(', ') : 'none'}.
