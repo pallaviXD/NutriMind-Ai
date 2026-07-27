@@ -21,7 +21,7 @@ router.post('/signup', async (req, res) => {
     if (!emailRegex.test(email))
       return res.status(400).json({ error: 'Invalid email address.' });
 
-    const existing = await db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase());
+    const existing = await db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase().trim());
     if (existing)
       return res.status(409).json({ error: 'An account with this email already exists.' });
 
