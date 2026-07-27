@@ -1,9 +1,9 @@
-import { createClient } from '@libsql/client';
+import { createClient } from "@libsql/client";
 
 // ─── Turso / libSQL client ────────────────────────────────────────────────────
 // Production: set TURSO_DATABASE_URL + TURSO_AUTH_TOKEN env vars (Turso cloud)
 // Local dev:  uses a local SQLite file automatically (no env vars needed)
-const url  = process.env.TURSO_DATABASE_URL  || 'file:./server/nutrimind.db';
+const url = process.env.TURSO_DATABASE_URL || "file:./server/nutrimind.db";
 const authToken = process.env.TURSO_AUTH_TOKEN || undefined;
 
 const libsql = createClient({ url, authToken });
@@ -98,15 +98,17 @@ const db = {
     return {
       // Returns first row or undefined
       get(...args) {
-        return libsql.execute({ sql, args: args.flat() }).then(r => r.rows[0] ?? undefined);
+        return libsql
+          .execute({ sql, args: args.flat() })
+          .then((r) => r.rows[0] ?? undefined);
       },
       // Returns all rows as an array
       all(...args) {
-        return libsql.execute({ sql, args: args.flat() }).then(r => r.rows);
+        return libsql.execute({ sql, args: args.flat() }).then((r) => r.rows);
       },
       // Returns { lastInsertRowid, changes }
       run(...args) {
-        return libsql.execute({ sql, args: args.flat() }).then(r => ({
+        return libsql.execute({ sql, args: args.flat() }).then((r) => ({
           lastInsertRowid: Number(r.lastInsertRowid),
           changes: r.rowsAffected,
         }));

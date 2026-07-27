@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
-import { simulateLocalAI } from '../services/aiService';
+import React, { createContext, useContext, useState } from "react";
+import { simulateLocalAI } from "../services/aiService";
 
 const GlobalContext = createContext();
 
@@ -7,16 +7,16 @@ export const useGlobalState = () => useContext(GlobalContext);
 
 // Quick actions map to natural-language strings the AI can parse
 const QUICK_ACTION_MAP = {
-  skipped_meal: 'I skipped a meal today',
-  ate_junk:     'I ate junk food today',
-  low_budget:   'I have a low budget today',
-  high_protein: 'I want high protein today',
+  skipped_meal: "I skipped a meal today",
+  ate_junk: "I ate junk food today",
+  low_budget: "I have a low budget today",
+  high_protein: "I want high protein today",
 };
 
 export const GlobalProvider = ({ children }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [profileLabel, setProfileLabel] = useState('Baseline Optimizer');
-  const [riskLevel, setRiskLevel] = useState('Low');
+  const [profileLabel, setProfileLabel] = useState("Baseline Optimizer");
+  const [riskLevel, setRiskLevel] = useState("Low");
   const [dailyCompletion, setDailyCompletion] = useState(0);
 
   // Health Profile
@@ -24,34 +24,46 @@ export const GlobalProvider = ({ children }) => {
 
   const [calories, setCalories] = useState({ current: 0, target: 2400 });
   const [macros, setMacros] = useState({
-    protein: 0, carbs: 0, fat: 0,
-    targetProtein: 150, targetCarbs: 250, targetFat: 80
+    protein: 0,
+    carbs: 0,
+    fat: 0,
+    targetProtein: 150,
+    targetCarbs: 250,
+    targetFat: 80,
   });
 
   const [meals, setMeals] = useState({
-    breakfast: { title: 'Not logged yet', cal: 0, status: 'pending' },
-    lunch:     { title: 'Not logged yet', cal: 0, status: 'pending' },
-    dinner:    { title: 'Not logged yet', cal: 0, status: 'pending' },
-    snacks:    { title: 'Not logged yet', cal: 0, status: 'pending' }
+    breakfast: { title: "Not logged yet", cal: 0, status: "pending" },
+    lunch: { title: "Not logged yet", cal: 0, status: "pending" },
+    dinner: { title: "Not logged yet", cal: 0, status: "pending" },
+    snacks: { title: "Not logged yet", cal: 0, status: "pending" },
   });
 
   const [pantry, setPantry] = useState([
-    'Chicken Breast (500g)', 'Rice (1kg)', 'Broccoli (2 heads)',
-    'Eggs (12)', 'Oats (500g)', 'Whey Protein', 'Olive Oil',
-    'Greek Yogurt', 'Avocado (2)'
+    "Chicken Breast (500g)",
+    "Rice (1kg)",
+    "Broccoli (2 heads)",
+    "Eggs (12)",
+    "Oats (500g)",
+    "Whey Protein",
+    "Olive Oil",
+    "Greek Yogurt",
+    "Avocado (2)",
   ]);
 
   // Single source of truth for ALL chat messages (shared across Left Panel + context)
   const [chatHistory, setChatHistory] = useState([
     {
-      role: 'ai',
-      text: '👋 NutriMind OS online! I can log your meals, suggest recipes from your pantry, help you stay motivated, or answer health questions. Try: "I ate 200g of chicken" or "What should I cook tonight?"'
-    }
+      role: "ai",
+      text: '👋 NutriMind OS online! I can log your meals, suggest recipes from your pantry, help you stay motivated, or answer health questions. Try: "I ate 200g of chicken" or "What should I cook tonight?"',
+    },
   ]);
 
   const [insights, setInsights] = useState({
-    adaptation: 'System initialized. Awaiting daily input to calibrate your metabolic engine.',
-    behavioral: 'No behavioral patterns detected yet. Start logging your first meal!'
+    adaptation:
+      "System initialized. Awaiting daily input to calibrate your metabolic engine.",
+    behavioral:
+      "No behavioral patterns detected yet. Start logging your first meal!",
   });
 
   // Core: process any user text input or quick-action type
@@ -62,45 +74,65 @@ export const GlobalProvider = ({ children }) => {
 
     setIsAnalyzing(true);
     // Push user message immediately so UI updates at once
-    setChatHistory(prev => [...prev, { role: 'user', text: input }]);
+    setChatHistory((prev) => [...prev, { role: "user", text: input }]);
 
     try {
       const response = await simulateLocalAI(input, {
-        calories, macros, meals, pantry, chatHistory, healthProfile, ...contextParams
+        calories,
+        macros,
+        meals,
+        pantry,
+        chatHistory,
+        healthProfile,
+        ...contextParams,
       });
 
       // If the AI returned an error (backend failure, not network), show as system warning
       if (response.isError) {
-        setChatHistory(prev => [...prev, {
-          role: 'system',
-          text: response.message,
-        }]);
+        setChatHistory((prev) => [
+          ...prev,
+          {
+            role: "system",
+            text: response.message,
+          },
+        ]);
         return;
       }
 
-      if (response.newMeals)    setMeals(prev => ({ ...prev, ...response.newMeals }));
-      if (response.newCalories) setCalories(prev => ({ ...prev, ...response.newCalories }));
-      if (response.newMacros)   setMacros(prev => ({ ...prev, ...response.newMacros }));
+      if (response.newMeals)
+        setMeals((prev) => ({ ...prev, ...response.newMeals }));
+      if (response.newCalories)
+        setCalories((prev) => ({ ...prev, ...response.newCalories }));
+      if (response.newMacros)
+        setMacros((prev) => ({ ...prev, ...response.newMacros }));
       if (response.profileLabel) setProfileLabel(response.profileLabel);
-      if (response.riskLevel)   setRiskLevel(response.riskLevel);
-      if (response.insights)    setInsights(prev => ({ ...prev, ...response.insights }));
+      if (response.riskLevel) setRiskLevel(response.riskLevel);
+      if (response.insights)
+        setInsights((prev) => ({ ...prev, ...response.insights }));
       if (response.pantryUpdate) setPantry(response.pantryUpdate);
 
       // Persist meal to DB when AI logs food
       if (response.newMeals) {
-        const token = localStorage.getItem('nm_token');
+        const token = localStorage.getItem("nm_token");
         const slot = Object.keys(response.newMeals)[0];
         const meal = response.newMeals[slot];
-        if (meal?.cal > 0 && meal?.status === 'completed') {
-          fetch('/api/user/meal-log', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        if (meal?.cal > 0 && meal?.status === "completed") {
+          fetch("/api/user/meal-log", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
             body: JSON.stringify({
               food_name: meal.title,
               calories: meal.cal,
-              protein: response.newMacros ? (response.newMacros.protein - macros.protein) : 0,
-              carbs: response.newMacros ? (response.newMacros.carbs - macros.carbs) : 0,
-              fat: response.newMacros ? (response.newMacros.fat - macros.fat) : 0,
+              protein: response.newMacros
+                ? response.newMacros.protein - macros.protein
+                : 0,
+              carbs: response.newMacros
+                ? response.newMacros.carbs - macros.carbs
+                : 0,
+              fat: response.newMacros ? response.newMacros.fat - macros.fat : 0,
               meal_type: slot,
             }),
           }).catch(console.error);
@@ -109,16 +141,25 @@ export const GlobalProvider = ({ children }) => {
 
       // Recompute daily completion based on newly set calories
       const updatedCals = response.newCalories || calories;
-      const pct = Math.min(100, Math.round((updatedCals.current / updatedCals.target) * 100));
+      const pct = Math.min(
+        100,
+        Math.round((updatedCals.current / updatedCals.target) * 100),
+      );
       if (response.newCalories || response.newMeals) setDailyCompletion(pct);
 
-      setChatHistory(prev => [...prev, { role: 'ai', text: response.message }]);
+      setChatHistory((prev) => [
+        ...prev,
+        { role: "ai", text: response.message },
+      ]);
     } catch (err) {
       console.error(err);
-      setChatHistory(prev => [...prev, {
-        role: 'system',
-        text: '⚠️ Neural core error. Please try again.'
-      }]);
+      setChatHistory((prev) => [
+        ...prev,
+        {
+          role: "system",
+          text: "⚠️ Neural core error. Please try again.",
+        },
+      ]);
     } finally {
       setIsAnalyzing(false);
     }
@@ -129,72 +170,88 @@ export const GlobalProvider = ({ children }) => {
     setHealthProfile(profile);
     let newTargets = {};
     switch (profile.goal) {
-      case 'gym':
+      case "gym":
         newTargets = { targetProtein: 180, targetCarbs: 220, targetFat: 70 };
-        setCalories(prev => ({ ...prev, target: 2800 }));
-        setProfileLabel('Gym Mode — Hypertrophy');
+        setCalories((prev) => ({ ...prev, target: 2800 }));
+        setProfileLabel("Gym Mode — Hypertrophy");
         break;
-      case 'diabetes':
+      case "diabetes":
         newTargets = { targetProtein: 130, targetCarbs: 130, targetFat: 60 };
-        setCalories(prev => ({ ...prev, target: 1800 }));
-        setProfileLabel('Diabetic Protocol — Low GI');
+        setCalories((prev) => ({ ...prev, target: 1800 }));
+        setProfileLabel("Diabetic Protocol — Low GI");
         break;
-      case 'weight_loss':
+      case "weight_loss":
         newTargets = { targetProtein: 160, targetCarbs: 150, targetFat: 55 };
-        setCalories(prev => ({ ...prev, target: 1600 }));
-        setProfileLabel('Fat-Loss Engine — Deficit Mode');
+        setCalories((prev) => ({ ...prev, target: 1600 }));
+        setProfileLabel("Fat-Loss Engine — Deficit Mode");
         break;
-      case 'heart':
+      case "heart":
         newTargets = { targetProtein: 120, targetCarbs: 200, targetFat: 45 };
-        setCalories(prev => ({ ...prev, target: 1900 }));
-        setProfileLabel('Cardiac Care — Low Sodium Plan');
+        setCalories((prev) => ({ ...prev, target: 1900 }));
+        setProfileLabel("Cardiac Care — Low Sodium Plan");
         break;
-      case 'custom':
+      case "custom":
         newTargets = {
           targetProtein: profile.protein || 150,
           targetCarbs: profile.carbs || 200,
-          targetFat: profile.fat || 65
+          targetFat: profile.fat || 65,
         };
-        setCalories(prev => ({ ...prev, target: profile.calories || 2200 }));
-        setProfileLabel('Custom Health Blueprint');
+        setCalories((prev) => ({ ...prev, target: profile.calories || 2200 }));
+        setProfileLabel("Custom Health Blueprint");
         break;
       default:
         newTargets = { targetProtein: 150, targetCarbs: 250, targetFat: 80 };
-        setCalories(prev => ({ ...prev, target: 2400 }));
-        setProfileLabel('Baseline Optimizer');
+        setCalories((prev) => ({ ...prev, target: 2400 }));
+        setProfileLabel("Baseline Optimizer");
     }
-    setMacros(prev => ({ ...prev, ...newTargets }));
+    setMacros((prev) => ({ ...prev, ...newTargets }));
 
     // Greet with profile-specific message
-    setChatHistory(prev => [...prev, {
-      role: 'ai',
-      text: `✅ Health profile activated: **${profile.label || profile.goal}**. I've adjusted your calorie targets, macro ratios, and risk thresholds to match your goal. Let's start tracking!`
-    }]);
+    setChatHistory((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        text: `✅ Health profile activated: **${profile.label || profile.goal}**. I've adjusted your calorie targets, macro ratios, and risk thresholds to match your goal. Let's start tracking!`,
+      },
+    ]);
   };
 
   const charts = {
     consistency: [
-      { day: 'Mon', value: 80 },
-      { day: 'Tue', value: 95 },
-      { day: 'Wed', value: 90 },
-      { day: 'Thu', value: 85 },
-      { day: 'Fri', value: 70 },
-      { day: 'Today', value: dailyCompletion || 5 }
+      { day: "Mon", value: 80 },
+      { day: "Tue", value: 95 },
+      { day: "Wed", value: 90 },
+      { day: "Thu", value: 85 },
+      { day: "Fri", value: 70 },
+      { day: "Today", value: dailyCompletion || 5 },
     ],
     macros: [
-      { name: 'Protein', value: macros.protein > 0 ? macros.protein : 1 },
-      { name: 'Carbs',   value: macros.carbs   > 0 ? macros.carbs   : 1 },
-      { name: 'Fat',     value: macros.fat      > 0 ? macros.fat     : 1 }
-    ]
+      { name: "Protein", value: macros.protein > 0 ? macros.protein : 1 },
+      { name: "Carbs", value: macros.carbs > 0 ? macros.carbs : 1 },
+      { name: "Fat", value: macros.fat > 0 ? macros.fat : 1 },
+    ],
   };
 
   return (
-    <GlobalContext.Provider value={{
-      isAnalyzing, profileLabel, riskLevel, dailyCompletion,
-      calories, macros, meals, pantry, chatHistory, insights, charts,
-      healthProfile,
-      processUserInput, setPantry, applyHealthProfile
-    }}>
+    <GlobalContext.Provider
+      value={{
+        isAnalyzing,
+        profileLabel,
+        riskLevel,
+        dailyCompletion,
+        calories,
+        macros,
+        meals,
+        pantry,
+        chatHistory,
+        insights,
+        charts,
+        healthProfile,
+        processUserInput,
+        setPantry,
+        applyHealthProfile,
+      }}
+    >
       {children}
     </GlobalContext.Provider>
   );
