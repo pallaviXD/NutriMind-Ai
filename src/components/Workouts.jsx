@@ -1,102 +1,407 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Dumbbell, ChevronDown, ChevronUp, Clock, Flame, RepeatIcon, Sparkles, RefreshCw, History, ArrowLeft, Calendar, Zap, Loader2, AlertCircle } from 'lucide-react';
-import { useGlobalState } from '../context/GlobalContext';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Dumbbell,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Flame,
+  RepeatIcon,
+  Sparkles,
+  RefreshCw,
+  History,
+  ArrowLeft,
+  Calendar,
+  Zap,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
+import { useGlobalState } from "../context/GlobalContext";
+import { useAuth } from "../context/AuthContext";
 
 // ─── Fallback static plans (used when no AI plan exists yet) ──────────────────
 const STATIC_PLANS = {
   gym: {
-    title: 'Hypertrophy Split',
-    subtitle: '7-Day Push / Pull / Legs Split',
+    title: "Hypertrophy Split",
+    subtitle: "7-Day Push / Pull / Legs Split",
     days: [
-      { day: 'Day 1 — Push (Chest, Shoulders, Triceps)', exercises: [
-        { name: 'Barbell Bench Press', sets: 4, reps: '8-10', rest: '90s', muscles: 'Chest' },
-        { name: 'Overhead Press', sets: 3, reps: '8-12', rest: '90s', muscles: 'Shoulders' },
-        { name: 'Incline Dumbbell Press', sets: 3, reps: '10-12', rest: '60s', muscles: 'Upper Chest' },
-        { name: 'Lateral Raises', sets: 4, reps: '12-15', rest: '45s', muscles: 'Deltoids' },
-        { name: 'Tricep Rope Pushdown', sets: 3, reps: '12-15', rest: '45s', muscles: 'Triceps' },
-      ]},
-      { day: 'Day 2 — Pull (Back, Biceps)', exercises: [
-        { name: 'Deadlift', sets: 4, reps: '5-6', rest: '3min', muscles: 'Posterior Chain' },
-        { name: 'Barbell Rows', sets: 3, reps: '8-10', rest: '90s', muscles: 'Lats / Rhomboids' },
-        { name: 'Pull-Ups or Lat Pulldown', sets: 3, reps: '8-12', rest: '90s', muscles: 'Lats' },
-        { name: 'Face Pulls', sets: 3, reps: '15-20', rest: '45s', muscles: 'Rear Delts' },
-        { name: 'Barbell Curl', sets: 3, reps: '10-12', rest: '60s', muscles: 'Biceps' },
-      ]},
-      { day: 'Day 3 — Legs', exercises: [
-        { name: 'Back Squat', sets: 4, reps: '6-8', rest: '3min', muscles: 'Quads / Glutes' },
-        { name: 'Romanian Deadlift', sets: 3, reps: '8-10', rest: '2min', muscles: 'Hamstrings' },
-        { name: 'Leg Press', sets: 3, reps: '10-12', rest: '90s', muscles: 'Quads' },
-        { name: 'Walking Lunges', sets: 3, reps: '12 each', rest: '60s', muscles: 'Glutes / Quads' },
-        { name: 'Calf Raises', sets: 4, reps: '15-20', rest: '45s', muscles: 'Calves' },
-      ]},
-      { day: 'Day 4 — Rest / Active Recovery', exercises: [
-        { name: 'Light Jog or Walk', sets: 1, reps: '20 min', rest: '—', muscles: 'Cardio' },
-        { name: 'Full Body Stretching', sets: 1, reps: '15 min', rest: '—', muscles: 'Flexibility' },
-      ]},
-      { day: 'Day 5 — Push (Volume)', exercises: [
-        { name: 'Dumbbell Flat Press', sets: 4, reps: '10-12', rest: '60s', muscles: 'Chest' },
-        { name: 'Arnold Press', sets: 3, reps: '10-12', rest: '60s', muscles: 'Shoulders' },
-        { name: 'Cable Flyes', sets: 3, reps: '12-15', rest: '45s', muscles: 'Chest' },
-        { name: 'Overhead Tricep Extension', sets: 3, reps: '12-15', rest: '45s', muscles: 'Triceps' },
-      ]},
-      { day: 'Day 6 — Pull (Width)', exercises: [
-        { name: 'Wide-Grip Pull-Ups', sets: 4, reps: '8-10', rest: '90s', muscles: 'Lats' },
-        { name: 'Seated Cable Row', sets: 3, reps: '10-12', rest: '60s', muscles: 'Mid Back' },
-        { name: 'Hammer Curls', sets: 3, reps: '10-12', rest: '60s', muscles: 'Biceps' },
-        { name: 'Shrugs', sets: 3, reps: '12-15', rest: '45s', muscles: 'Traps' },
-      ]},
-      { day: 'Day 7 — Active Recovery', exercises: [
-        { name: 'Light Jog or Cycle', sets: 1, reps: '20 min', rest: '—', muscles: 'Cardio' },
-        { name: 'Foam Rolling', sets: 1, reps: '10 min', rest: '—', muscles: 'Recovery' },
-      ]},
+      {
+        day: "Day 1 — Push (Chest, Shoulders, Triceps)",
+        exercises: [
+          {
+            name: "Barbell Bench Press",
+            sets: 4,
+            reps: "8-10",
+            rest: "90s",
+            muscles: "Chest",
+          },
+          {
+            name: "Overhead Press",
+            sets: 3,
+            reps: "8-12",
+            rest: "90s",
+            muscles: "Shoulders",
+          },
+          {
+            name: "Incline Dumbbell Press",
+            sets: 3,
+            reps: "10-12",
+            rest: "60s",
+            muscles: "Upper Chest",
+          },
+          {
+            name: "Lateral Raises",
+            sets: 4,
+            reps: "12-15",
+            rest: "45s",
+            muscles: "Deltoids",
+          },
+          {
+            name: "Tricep Rope Pushdown",
+            sets: 3,
+            reps: "12-15",
+            rest: "45s",
+            muscles: "Triceps",
+          },
+        ],
+      },
+      {
+        day: "Day 2 — Pull (Back, Biceps)",
+        exercises: [
+          {
+            name: "Deadlift",
+            sets: 4,
+            reps: "5-6",
+            rest: "3min",
+            muscles: "Posterior Chain",
+          },
+          {
+            name: "Barbell Rows",
+            sets: 3,
+            reps: "8-10",
+            rest: "90s",
+            muscles: "Lats / Rhomboids",
+          },
+          {
+            name: "Pull-Ups or Lat Pulldown",
+            sets: 3,
+            reps: "8-12",
+            rest: "90s",
+            muscles: "Lats",
+          },
+          {
+            name: "Face Pulls",
+            sets: 3,
+            reps: "15-20",
+            rest: "45s",
+            muscles: "Rear Delts",
+          },
+          {
+            name: "Barbell Curl",
+            sets: 3,
+            reps: "10-12",
+            rest: "60s",
+            muscles: "Biceps",
+          },
+        ],
+      },
+      {
+        day: "Day 3 — Legs",
+        exercises: [
+          {
+            name: "Back Squat",
+            sets: 4,
+            reps: "6-8",
+            rest: "3min",
+            muscles: "Quads / Glutes",
+          },
+          {
+            name: "Romanian Deadlift",
+            sets: 3,
+            reps: "8-10",
+            rest: "2min",
+            muscles: "Hamstrings",
+          },
+          {
+            name: "Leg Press",
+            sets: 3,
+            reps: "10-12",
+            rest: "90s",
+            muscles: "Quads",
+          },
+          {
+            name: "Walking Lunges",
+            sets: 3,
+            reps: "12 each",
+            rest: "60s",
+            muscles: "Glutes / Quads",
+          },
+          {
+            name: "Calf Raises",
+            sets: 4,
+            reps: "15-20",
+            rest: "45s",
+            muscles: "Calves",
+          },
+        ],
+      },
+      {
+        day: "Day 4 — Rest / Active Recovery",
+        exercises: [
+          {
+            name: "Light Jog or Walk",
+            sets: 1,
+            reps: "20 min",
+            rest: "—",
+            muscles: "Cardio",
+          },
+          {
+            name: "Full Body Stretching",
+            sets: 1,
+            reps: "15 min",
+            rest: "—",
+            muscles: "Flexibility",
+          },
+        ],
+      },
+      {
+        day: "Day 5 — Push (Volume)",
+        exercises: [
+          {
+            name: "Dumbbell Flat Press",
+            sets: 4,
+            reps: "10-12",
+            rest: "60s",
+            muscles: "Chest",
+          },
+          {
+            name: "Arnold Press",
+            sets: 3,
+            reps: "10-12",
+            rest: "60s",
+            muscles: "Shoulders",
+          },
+          {
+            name: "Cable Flyes",
+            sets: 3,
+            reps: "12-15",
+            rest: "45s",
+            muscles: "Chest",
+          },
+          {
+            name: "Overhead Tricep Extension",
+            sets: 3,
+            reps: "12-15",
+            rest: "45s",
+            muscles: "Triceps",
+          },
+        ],
+      },
+      {
+        day: "Day 6 — Pull (Width)",
+        exercises: [
+          {
+            name: "Wide-Grip Pull-Ups",
+            sets: 4,
+            reps: "8-10",
+            rest: "90s",
+            muscles: "Lats",
+          },
+          {
+            name: "Seated Cable Row",
+            sets: 3,
+            reps: "10-12",
+            rest: "60s",
+            muscles: "Mid Back",
+          },
+          {
+            name: "Hammer Curls",
+            sets: 3,
+            reps: "10-12",
+            rest: "60s",
+            muscles: "Biceps",
+          },
+          {
+            name: "Shrugs",
+            sets: 3,
+            reps: "12-15",
+            rest: "45s",
+            muscles: "Traps",
+          },
+        ],
+      },
+      {
+        day: "Day 7 — Active Recovery",
+        exercises: [
+          {
+            name: "Light Jog or Cycle",
+            sets: 1,
+            reps: "20 min",
+            rest: "—",
+            muscles: "Cardio",
+          },
+          {
+            name: "Foam Rolling",
+            sets: 1,
+            reps: "10 min",
+            rest: "—",
+            muscles: "Recovery",
+          },
+        ],
+      },
     ],
-    nutrition: ['Eat 1g protein per lb of bodyweight', 'Caloric surplus of 200-300 kcal', 'Creatine 5g/day', 'Pre-workout meal 90 min before training'],
+    nutrition: [
+      "Eat 1g protein per lb of bodyweight",
+      "Caloric surplus of 200-300 kcal",
+      "Creatine 5g/day",
+      "Pre-workout meal 90 min before training",
+    ],
   },
   general: {
-    title: 'General Wellness Plan',
-    subtitle: '7-Day Balanced Fitness Plan',
+    title: "General Wellness Plan",
+    subtitle: "7-Day Balanced Fitness Plan",
     days: [
-      { day: 'Day 1 — Full Body', exercises: [
-        { name: 'Bodyweight Squat', sets: 3, reps: '15', rest: '45s', muscles: 'Legs' },
-        { name: 'Push-Ups', sets: 3, reps: '10-15', rest: '45s', muscles: 'Chest' },
-        { name: 'Plank', sets: 3, reps: '30-45s', rest: '30s', muscles: 'Core' },
-      ]},
-      { day: 'Day 2 — Cardio', exercises: [
-        { name: '20-min brisk walk or jog', sets: 1, reps: '20 min', rest: '—', muscles: 'Cardio' },
-      ]},
-      { day: 'Day 3 — Core', exercises: [
-        { name: 'Dead Bug', sets: 3, reps: '10 each', rest: '30s', muscles: 'Deep Core' },
-        { name: 'Glute Bridge', sets: 3, reps: '15', rest: '45s', muscles: 'Glutes' },
-      ]},
-      { day: 'Day 4 — Upper Body', exercises: [
-        { name: 'Dumbbell Overhead Press', sets: 3, reps: '10-12', rest: '60s', muscles: 'Shoulders' },
-        { name: 'Dumbbell Row', sets: 3, reps: '10 each', rest: '60s', muscles: 'Back' },
-      ]},
-      { day: 'Day 5 — HIIT', exercises: [
-        { name: 'Jumping Jacks', sets: 3, reps: '45s on / 15s off', rest: '—', muscles: 'Full Body' },
-        { name: 'Mountain Climbers', sets: 3, reps: '40s on / 20s off', rest: '—', muscles: 'Core' },
-      ]},
-      { day: 'Day 6 — Yoga', exercises: [
-        { name: 'Sun Salutation', sets: 3, reps: '5 rounds', rest: '—', muscles: 'Full Body' },
-      ]},
-      { day: 'Day 7 — Rest', exercises: [
-        { name: '30-min walk', sets: 1, reps: '30 min', rest: '—', muscles: 'Recovery' },
-      ]},
+      {
+        day: "Day 1 — Full Body",
+        exercises: [
+          {
+            name: "Bodyweight Squat",
+            sets: 3,
+            reps: "15",
+            rest: "45s",
+            muscles: "Legs",
+          },
+          {
+            name: "Push-Ups",
+            sets: 3,
+            reps: "10-15",
+            rest: "45s",
+            muscles: "Chest",
+          },
+          {
+            name: "Plank",
+            sets: 3,
+            reps: "30-45s",
+            rest: "30s",
+            muscles: "Core",
+          },
+        ],
+      },
+      {
+        day: "Day 2 — Cardio",
+        exercises: [
+          {
+            name: "20-min brisk walk or jog",
+            sets: 1,
+            reps: "20 min",
+            rest: "—",
+            muscles: "Cardio",
+          },
+        ],
+      },
+      {
+        day: "Day 3 — Core",
+        exercises: [
+          {
+            name: "Dead Bug",
+            sets: 3,
+            reps: "10 each",
+            rest: "30s",
+            muscles: "Deep Core",
+          },
+          {
+            name: "Glute Bridge",
+            sets: 3,
+            reps: "15",
+            rest: "45s",
+            muscles: "Glutes",
+          },
+        ],
+      },
+      {
+        day: "Day 4 — Upper Body",
+        exercises: [
+          {
+            name: "Dumbbell Overhead Press",
+            sets: 3,
+            reps: "10-12",
+            rest: "60s",
+            muscles: "Shoulders",
+          },
+          {
+            name: "Dumbbell Row",
+            sets: 3,
+            reps: "10 each",
+            rest: "60s",
+            muscles: "Back",
+          },
+        ],
+      },
+      {
+        day: "Day 5 — HIIT",
+        exercises: [
+          {
+            name: "Jumping Jacks",
+            sets: 3,
+            reps: "45s on / 15s off",
+            rest: "—",
+            muscles: "Full Body",
+          },
+          {
+            name: "Mountain Climbers",
+            sets: 3,
+            reps: "40s on / 20s off",
+            rest: "—",
+            muscles: "Core",
+          },
+        ],
+      },
+      {
+        day: "Day 6 — Yoga",
+        exercises: [
+          {
+            name: "Sun Salutation",
+            sets: 3,
+            reps: "5 rounds",
+            rest: "—",
+            muscles: "Full Body",
+          },
+        ],
+      },
+      {
+        day: "Day 7 — Rest",
+        exercises: [
+          {
+            name: "30-min walk",
+            sets: 1,
+            reps: "30 min",
+            rest: "—",
+            muscles: "Recovery",
+          },
+        ],
+      },
     ],
-    nutrition: ['Eat whole foods 80% of the time', 'Drink at least 2L water', 'Sleep 7-8 hours', 'Include fruits and vegetables daily'],
+    nutrition: [
+      "Eat whole foods 80% of the time",
+      "Drink at least 2L water",
+      "Sleep 7-8 hours",
+      "Include fruits and vegetables daily",
+    ],
   },
 };
 
 const Workouts = () => {
   const { healthProfile } = useGlobalState();
   const { profile } = useAuth();
-  const goalKey = healthProfile?.goal || profile?.health_goal || 'general';
+  const goalKey = healthProfile?.goal || profile?.health_goal || "general";
 
   // State
   const [currentPlan, setCurrentPlan] = useState(null);
-  const [planMeta, setPlanMeta] = useState({ version: null, createdAt: null, cached: false });
+  const [planMeta, setPlanMeta] = useState({
+    version: null,
+    createdAt: null,
+    cached: false,
+  });
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [viewingHistoryPlan, setViewingHistoryPlan] = useState(null);
@@ -106,21 +411,25 @@ const Workouts = () => {
   const [openDay, setOpenDay] = useState(0);
   const [hasLoaded, setHasLoaded] = useState(false);
 
-  const token = localStorage.getItem('nm_token');
+  const token = localStorage.getItem("nm_token");
 
   // Fetch the latest plan on mount
   const fetchLatest = useCallback(async () => {
     try {
-      const res = await fetch('/api/user/workout-plan/latest', {
+      const res = await fetch("/api/user/workout-plan/latest", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (data.success && data.plan) {
         setCurrentPlan(data.plan);
-        setPlanMeta({ version: data.version, createdAt: data.createdAt, cached: true });
+        setPlanMeta({
+          version: data.version,
+          createdAt: data.createdAt,
+          cached: true,
+        });
       }
     } catch (err) {
-      console.error('Failed to fetch latest plan:', err);
+      console.error("Failed to fetch latest plan:", err);
     } finally {
       setHasLoaded(true);
     }
@@ -135,26 +444,30 @@ const Workouts = () => {
     setIsGenerating(true);
     setError(null);
     try {
-      const res = await fetch('/api/user/workout-plan', {
-        method: 'POST',
+      const res = await fetch("/api/user/workout-plan", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ goal: goalKey, forceRegenerate }),
       });
       const data = await res.json();
       if (!res.ok || data.error) {
-        setError(data.error || 'Failed to generate workout plan.');
+        setError(data.error || "Failed to generate workout plan.");
         return;
       }
       setCurrentPlan(data.plan);
-      setPlanMeta({ version: data.version, createdAt: data.createdAt, cached: data.cached });
+      setPlanMeta({
+        version: data.version,
+        createdAt: data.createdAt,
+        cached: data.cached,
+      });
       setOpenDay(0);
       setViewingHistoryPlan(null);
     } catch (err) {
-      console.error('Generate plan error:', err);
-      setError('Network error. Please try again.');
+      console.error("Generate plan error:", err);
+      setError("Network error. Please try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -164,7 +477,7 @@ const Workouts = () => {
   const fetchHistory = async () => {
     setIsLoadingHistory(true);
     try {
-      const res = await fetch('/api/user/workout-plan/history?limit=20', {
+      const res = await fetch("/api/user/workout-plan/history?limit=20", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -172,7 +485,7 @@ const Workouts = () => {
         setHistory(data.plans || []);
       }
     } catch (err) {
-      console.error('Failed to fetch history:', err);
+      console.error("Failed to fetch history:", err);
     } finally {
       setIsLoadingHistory(false);
     }
@@ -187,12 +500,16 @@ const Workouts = () => {
       const data = await res.json();
       if (data.success) {
         setViewingHistoryPlan(data.plan);
-        setPlanMeta({ version: data.version, createdAt: data.createdAt, cached: true });
+        setPlanMeta({
+          version: data.version,
+          createdAt: data.createdAt,
+          cached: true,
+        });
         setOpenDay(0);
         setShowHistory(false);
       }
     } catch (err) {
-      console.error('Failed to load plan:', err);
+      console.error("Failed to load plan:", err);
     }
   };
 
@@ -202,13 +519,23 @@ const Workouts = () => {
   };
 
   // The plan to display — either a history plan, the current AI plan, or the static fallback
-  const displayPlan = viewingHistoryPlan || currentPlan || STATIC_PLANS[goalKey] || STATIC_PLANS.general;
+  const displayPlan =
+    viewingHistoryPlan ||
+    currentPlan ||
+    STATIC_PLANS[goalKey] ||
+    STATIC_PLANS.general;
   const isStaticFallback = !viewingHistoryPlan && !currentPlan;
 
   const formatDate = (unixTs) => {
-    if (!unixTs) return '';
+    if (!unixTs) return "";
     const d = new Date(unixTs * 1000);
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   // ─── History Panel ────────────────────────────────────────────────────────────
@@ -227,7 +554,9 @@ const Workouts = () => {
               <History className="text-accent-purple" size={28} />
               Workout Plan History
             </h1>
-            <p className="text-muted text-sm mt-1">Your previously generated workout plans</p>
+            <p className="text-muted text-sm mt-1">
+              Your previously generated workout plans
+            </p>
           </div>
         </div>
 
@@ -239,8 +568,12 @@ const Workouts = () => {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <History size={48} className="text-muted/30 mx-auto mb-3" />
-              <p className="text-muted text-sm">No workout plans generated yet.</p>
-              <p className="text-muted/60 text-xs mt-1">Generate your first AI plan to see it here.</p>
+              <p className="text-muted text-sm">
+                No workout plans generated yet.
+              </p>
+              <p className="text-muted/60 text-xs mt-1">
+                Generate your first AI plan to see it here.
+              </p>
             </div>
           </div>
         ) : (
@@ -259,14 +592,19 @@ const Workouts = () => {
                     v{h.version}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Workout Plan v{h.version}</p>
+                    <p className="text-sm font-semibold text-foreground">
+                      Workout Plan v{h.version}
+                    </p>
                     <p className="text-xs text-muted flex items-center gap-1 mt-0.5">
                       <Calendar size={10} />
                       {formatDate(h.created_at)}
                     </p>
                   </div>
                 </div>
-                <ChevronDown size={16} className="text-muted group-hover:text-accent-neon transition-colors -rotate-90" />
+                <ChevronDown
+                  size={16}
+                  className="text-muted group-hover:text-accent-neon transition-colors -rotate-90"
+                />
               </motion.button>
             ))}
           </div>
@@ -345,11 +683,16 @@ const Workouts = () => {
               </span>
             )}
             {planMeta.cached && (
-              <span className="text-xs text-accent-cyan/70">⚡ Served from cache</span>
+              <span className="text-xs text-accent-cyan/70">
+                ⚡ Served from cache
+              </span>
             )}
             {viewingHistoryPlan && (
               <button
-                onClick={() => { setViewingHistoryPlan(null); setOpenDay(0); }}
+                onClick={() => {
+                  setViewingHistoryPlan(null);
+                  setOpenDay(0);
+                }}
                 className="text-xs text-muted hover:text-accent-neon transition-colors underline underline-offset-2"
               >
                 ← Back to latest
@@ -366,7 +709,8 @@ const Workouts = () => {
             className="mt-3 flex items-center gap-2 px-3 py-2 rounded-xl bg-accent-purple/5 border border-accent-purple/20 text-xs text-accent-purple"
           >
             <AlertCircle size={14} />
-            Showing a default plan. Click <strong>"Generate AI Plan"</strong> to get a personalized workout tailored to your profile.
+            Showing a default plan. Click <strong>"Generate AI Plan"</strong> to
+            get a personalized workout tailored to your profile.
           </motion.div>
         )}
 
@@ -387,19 +731,31 @@ const Workouts = () => {
       <div className="flex flex-col gap-4">
         {displayPlan.days.map((d, i) => (
           <div key={i} className="glass-panel overflow-hidden">
-            <button onClick={() => setOpenDay(openDay === i ? -1 : i)}
+            <button
+              onClick={() => setOpenDay(openDay === i ? -1 : i)}
               className="w-full flex items-center justify-between p-5 text-left hover:bg-accent-neon/5 transition-colors"
             >
               <div>
-                <span className="text-xs text-accent-neon font-semibold uppercase tracking-wider">Session {i + 1}</span>
+                <span className="text-xs text-accent-neon font-semibold uppercase tracking-wider">
+                  Session {i + 1}
+                </span>
                 <h3 className="font-bold text-foreground mt-0.5">{d.day}</h3>
               </div>
-              {openDay === i ? <ChevronUp size={18} className="text-muted" /> : <ChevronDown size={18} className="text-muted" />}
+              {openDay === i ? (
+                <ChevronUp size={18} className="text-muted" />
+              ) : (
+                <ChevronDown size={18} className="text-muted" />
+              )}
             </button>
 
             <AnimatePresence>
               {openDay === i && (
-                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25 }}>
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                >
                   <div className="px-5 pb-5 space-y-3 border-t border-border/50">
                     <div className="grid grid-cols-4 text-xs font-semibold uppercase tracking-wider text-muted pt-4 px-1">
                       <span className="col-span-2">Exercise</span>
@@ -407,16 +763,26 @@ const Workouts = () => {
                       <span>Rest</span>
                     </div>
                     {d.exercises.map((ex, j) => (
-                      <motion.div key={j} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: j * 0.05 }}
+                      <motion.div
+                        key={j}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: j * 0.05 }}
                         className="grid grid-cols-4 items-center p-3 rounded-xl bg-background/50 border border-border/50 hover:border-accent-neon/20 transition-all group"
                       >
                         <div className="col-span-2">
-                          <div className="font-semibold text-sm text-foreground">{ex.name}</div>
-                          <div className="text-xs text-muted mt-0.5">{ex.muscles}</div>
+                          <div className="font-semibold text-sm text-foreground">
+                            {ex.name}
+                          </div>
+                          <div className="text-xs text-muted mt-0.5">
+                            {ex.muscles}
+                          </div>
                         </div>
                         <div className="flex items-center gap-1 text-sm font-mono">
                           <RepeatIcon size={12} className="text-accent-neon" />
-                          <span>{ex.sets} × {ex.reps}</span>
+                          <span>
+                            {ex.sets} × {ex.reps}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1 text-sm text-muted">
                           <Clock size={12} />
@@ -440,7 +806,10 @@ const Workouts = () => {
           </h3>
           <ul className="space-y-2">
             {displayPlan.nutrition.map((tip, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
+              <li
+                key={i}
+                className="flex items-start gap-2 text-sm text-foreground/80"
+              >
                 <span className="text-accent-neon mt-0.5">→</span> {tip}
               </li>
             ))}

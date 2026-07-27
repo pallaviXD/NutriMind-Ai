@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 
 const fragmentShaderSource = `#version 300 es
 precision highp float;
@@ -31,20 +31,22 @@ void main(){
 class Renderer {
   constructor(canvas, fragmentSource) {
     this.canvas = canvas;
-    this.gl = canvas.getContext('webgl2');
+    this.gl = canvas.getContext("webgl2");
     this.color = [0.055, 0.647, 0.914]; // accent-neon default
     this.vertexSrc = `#version 300 es
 precision highp float;
 in vec4 position;
 void main(){ gl_Position=position; }`;
-    this.vertices = [-1,1,-1,-1,1,1,1,-1];
+    this.vertices = [-1, 1, -1, -1, 1, 1, 1, -1];
     this.setup(fragmentSource);
     this.init();
   }
-  updateColor(c) { this.color = c; }
+  updateColor(c) {
+    this.color = c;
+  }
   updateScale() {
     const dpr = Math.max(1, window.devicePixelRatio);
-    this.canvas.width  = window.innerWidth  * dpr;
+    this.canvas.width = window.innerWidth * dpr;
     this.canvas.height = window.innerHeight * dpr;
     this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
   }
@@ -53,13 +55,19 @@ void main(){ gl_Position=position; }`;
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-      console.error('Shader error:', gl.getShaderInfoLog(shader));
+      console.error("Shader error:", gl.getShaderInfoLog(shader));
   }
   reset() {
     const { gl, program, vs, fs } = this;
     if (!program) return;
-    if (vs) { gl.detachShader(program, vs); gl.deleteShader(vs); }
-    if (fs) { gl.detachShader(program, fs); gl.deleteShader(fs); }
+    if (vs) {
+      gl.detachShader(program, vs);
+      gl.deleteShader(vs);
+    }
+    if (fs) {
+      gl.detachShader(program, fs);
+      gl.deleteShader(fs);
+    }
     gl.deleteProgram(program);
     this.program = null;
   }
@@ -74,25 +82,29 @@ void main(){ gl_Position=position; }`;
     gl.attachShader(this.program, this.fs);
     gl.linkProgram(this.program);
     if (!gl.getProgramParameter(this.program, gl.LINK_STATUS))
-      console.error('Program error:', gl.getProgramInfoLog(this.program));
+      console.error("Program error:", gl.getProgramInfoLog(this.program));
   }
   init() {
     const { gl, program } = this;
     if (!program) return;
     this.buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
-    const pos = gl.getAttribLocation(program, 'position');
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array(this.vertices),
+      gl.STATIC_DRAW,
+    );
+    const pos = gl.getAttribLocation(program, "position");
     gl.enableVertexAttribArray(pos);
     gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
-    program.resolution = gl.getUniformLocation(program, 'resolution');
-    program.time       = gl.getUniformLocation(program, 'time');
-    program.u_color    = gl.getUniformLocation(program, 'u_color');
+    program.resolution = gl.getUniformLocation(program, "resolution");
+    program.time = gl.getUniformLocation(program, "time");
+    program.u_color = gl.getUniformLocation(program, "u_color");
   }
   render(now = 0) {
     const { gl, program, buffer, canvas } = this;
     if (!program || !gl.isProgram(program)) return;
-    gl.clearColor(0,0,0,1);
+    gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(program);
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -105,11 +117,17 @@ void main(){ gl_Position=position; }`;
 
 const hexToRgb = (hex) => {
   const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return r ? [parseInt(r[1],16)/255, parseInt(r[2],16)/255, parseInt(r[3],16)/255] : null;
+  return r
+    ? [
+        parseInt(r[1], 16) / 255,
+        parseInt(r[2], 16) / 255,
+        parseInt(r[3], 16) / 255,
+      ]
+    : null;
 };
 
-export const SmokeBackground = ({ smokeColor = '#0ea5e9' }) => {
-  const canvasRef   = useRef(null);
+export const SmokeBackground = ({ smokeColor = "#0ea5e9" }) => {
+  const canvasRef = useRef(null);
   const rendererRef = useRef(null);
 
   useEffect(() => {
@@ -118,11 +136,18 @@ export const SmokeBackground = ({ smokeColor = '#0ea5e9' }) => {
     rendererRef.current = renderer;
     const onResize = () => renderer.updateScale();
     onResize();
-    window.addEventListener('resize', onResize);
+    window.addEventListener("resize", onResize);
     let raf;
-    const loop = (now) => { renderer.render(now); raf = requestAnimationFrame(loop); };
+    const loop = (now) => {
+      renderer.render(now);
+      raf = requestAnimationFrame(loop);
+    };
     loop(0);
-    return () => { window.removeEventListener('resize', onResize); cancelAnimationFrame(raf); renderer.reset(); };
+    return () => {
+      window.removeEventListener("resize", onResize);
+      cancelAnimationFrame(raf);
+      renderer.reset();
+    };
   }, []);
 
   useEffect(() => {

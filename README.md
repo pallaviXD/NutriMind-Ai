@@ -29,18 +29,18 @@ NutriMind OS is your personal AI health coach. Log meals through natural convers
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | React 19, Vite 8, React Router 7 |
-| Styling | Tailwind CSS 3.4, Framer Motion 12 |
-| Charts | Recharts 3 |
-| Icons | Lucide React |
-| Backend | Express 5, Node.js 20 (ESM) |
-| Database | Turso (libSQL / cloud SQLite) |
-| AI | Llama 3.3 70B via Groq SDK |
-| Auth | JWT (jsonwebtoken) + bcryptjs |
-| Security | Helmet, express-rate-limit |
-| Deployment | Docker + Render |
+| Layer      | Technology                         |
+| ---------- | ---------------------------------- |
+| Frontend   | React 19, Vite 8, React Router 7   |
+| Styling    | Tailwind CSS 3.4, Framer Motion 12 |
+| Charts     | Recharts 3                         |
+| Icons      | Lucide React                       |
+| Backend    | Express 5, Node.js 20 (ESM)        |
+| Database   | Turso (libSQL / cloud SQLite)      |
+| AI         | Llama 3.3 70B via Groq SDK         |
+| Auth       | JWT (jsonwebtoken) + bcryptjs      |
+| Security   | Helmet, express-rate-limit         |
+| Deployment | Docker + Render                    |
 
 ---
 
@@ -94,33 +94,34 @@ nutrimind-ai/
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | /api/auth/signup | Register — sends verification email |
-| GET | /api/auth/verify/:token | Verify email token |
-| POST | /api/auth/login | Login, returns JWT |
-| GET | /api/user/profile | Get user + profile |
-| PUT | /api/user/profile | Update profile |
-| GET | /api/user/stats | BMI, BMR, TDEE, ideal weight |
-| POST | /api/user/chat | AI chat (Groq Llama 3.3 70B) |
-| POST | /api/user/recipe | AI recipe from pantry |
-| POST | /api/user/health-advice | Personalized food advice |
-| POST | /api/user/meal-log | Save meal |
-| GET | /api/user/meal-log | Recent meals |
-| POST | /api/user/weight-log | Log weight |
-| GET | /api/user/weight-log | Weight history |
-| POST | /api/user/water-log | Log water glasses |
-| GET | /api/user/water-log | Today's water count |
-| GET | /api/user/analytics | Aggregated nutrition data |
-| POST | /api/user/workout-plan | Generate / fetch cached AI workout plan |
-| GET | /api/user/workout-plan/latest | Most recent plan |
-| GET | /api/health | Health check |
+| Method | Endpoint                      | Description                             |
+| ------ | ----------------------------- | --------------------------------------- |
+| POST   | /api/auth/signup              | Register — sends verification email     |
+| GET    | /api/auth/verify/:token       | Verify email token                      |
+| POST   | /api/auth/login               | Login, returns JWT                      |
+| GET    | /api/user/profile             | Get user + profile                      |
+| PUT    | /api/user/profile             | Update profile                          |
+| GET    | /api/user/stats               | BMI, BMR, TDEE, ideal weight            |
+| POST   | /api/user/chat                | AI chat (Groq Llama 3.3 70B)            |
+| POST   | /api/user/recipe              | AI recipe from pantry                   |
+| POST   | /api/user/health-advice       | Personalized food advice                |
+| POST   | /api/user/meal-log            | Save meal                               |
+| GET    | /api/user/meal-log            | Recent meals                            |
+| POST   | /api/user/weight-log          | Log weight                              |
+| GET    | /api/user/weight-log          | Weight history                          |
+| POST   | /api/user/water-log           | Log water glasses                       |
+| GET    | /api/user/water-log           | Today's water count                     |
+| GET    | /api/user/analytics           | Aggregated nutrition data               |
+| POST   | /api/user/workout-plan        | Generate / fetch cached AI workout plan |
+| GET    | /api/user/workout-plan/latest | Most recent plan                        |
+| GET    | /api/health                   | Health check                            |
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
 - Free [Groq API key](https://console.groq.com) — no credit card needed
 - Free [Turso database](https://app.turso.tech) — for persistent storage
@@ -184,16 +185,16 @@ This project ships with a `render.yaml` blueprint.
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|---|---|---|
-| `JWT_SECRET` | Yes | Long random string for signing JWTs |
-| `GROQ_API_KEY` | Yes | Groq API key for Llama 3.3 70B |
-| `TURSO_DATABASE_URL` | Prod | `libsql://your-db.turso.io` |
-| `TURSO_AUTH_TOKEN` | Prod | Turso auth token |
-| `PORT` | No | Defaults to 3001 locally, set by platform in prod |
-| `CLIENT_URL` | No | Frontend URL for email links |
-| `EMAIL_USER` | No | Gmail for email verification |
-| `EMAIL_PASS` | No | Gmail App Password |
+| Variable             | Required | Description                                       |
+| -------------------- | -------- | ------------------------------------------------- |
+| `JWT_SECRET`         | Yes      | Long random string for signing JWTs               |
+| `GROQ_API_KEY`       | Yes      | Groq API key for Llama 3.3 70B                    |
+| `TURSO_DATABASE_URL` | Prod     | `libsql://your-db.turso.io`                       |
+| `TURSO_AUTH_TOKEN`   | Prod     | Turso auth token                                  |
+| `PORT`               | No       | Defaults to 3001 locally, set by platform in prod |
+| `CLIENT_URL`         | No       | Frontend URL for email links                      |
+| `EMAIL_USER`         | No       | Gmail for email verification                      |
+| `EMAIL_PASS`         | No       | Gmail App Password                                |
 
 ---
 

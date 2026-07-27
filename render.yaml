@@ -16,12 +16,12 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: GROQ_API_KEY
-        sync: false                  # Paste in Render dashboard
+        sync: false # Paste in Render dashboard
       - key: CLIENT_URL
-        sync: false                  # Set to your Render URL after first deploy
+        sync: false # Set to your Render URL after first deploy
       - key: TURSO_DATABASE_URL
-        sync: false                  # Paste from Turso dashboard
+        sync: false # Paste from Turso dashboard
       - key: TURSO_AUTH_TOKEN
-        sync: false                  # Paste from Turso dashboard
+        sync: false # Paste from Turso dashboard
 
     healthCheckPath: /api/health

@@ -1,8 +1,8 @@
-import React from 'react';
-import LeftPanel from './LeftPanel';
-import CenterPanel from './CenterPanel';
-import RightPanel from './RightPanel';
-import { useGlobalState } from '../context/GlobalContext';
+import React from "react";
+import LeftPanel from "./LeftPanel";
+import CenterPanel from "./CenterPanel";
+import RightPanel from "./RightPanel";
+import { useGlobalState } from "../context/GlobalContext";
 
 const Dashboard = () => {
   const state = useGlobalState();

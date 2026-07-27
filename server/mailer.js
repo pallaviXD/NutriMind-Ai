@@ -1,14 +1,19 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 dotenv.config();
 
 const createTransport = () => {
-  if (!process.env.EMAIL_PASS || process.env.EMAIL_PASS === 'YOUR_APP_PASSWORD_HERE') {
-    console.warn('⚠️  EMAIL_PASS not set in .env — emails will be logged to console only');
+  if (
+    !process.env.EMAIL_PASS ||
+    process.env.EMAIL_PASS === "YOUR_APP_PASSWORD_HERE"
+  ) {
+    console.warn(
+      "⚠️  EMAIL_PASS not set in .env — emails will be logged to console only",
+    );
     return null;
   }
   return nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -20,8 +25,10 @@ let transporter = createTransport();
 
 const sendMail = async (to, subject, html) => {
   if (!transporter) {
-    console.log(`\n📧 [EMAIL TO: ${to}]\nSubject: ${subject}\n${html.replace(/<[^>]*>/g, '')}\n`);
-    return { messageId: 'console-only' };
+    console.log(
+      `\n📧 [EMAIL TO: ${to}]\nSubject: ${subject}\n${html.replace(/<[^>]*>/g, "")}\n`,
+    );
+    return { messageId: "console-only" };
   }
   return transporter.sendMail({
     from: `"NutriMind OS" <${process.env.EMAIL_USER}>`,
@@ -32,8 +39,11 @@ const sendMail = async (to, subject, html) => {
 };
 
 export const sendVerificationEmail = async (name, email, token) => {
-  const verifyUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify-email?token=${token}`;
-  return sendMail(email, 'Verify your NutriMind OS account', `
+  const verifyUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/verify-email?token=${token}`;
+  return sendMail(
+    email,
+    "Verify your NutriMind OS account",
+    `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#09090b;color:#fafafa;padding:40px;border-radius:16px;">
       <div style="text-align:center;margin-bottom:32px;">
         <h1 style="color:#0ea5e9;font-size:28px;margin:0;">NutriMind <span style="color:#8b5cf6;">OS</span></h1>
@@ -52,11 +62,15 @@ export const sendVerificationEmail = async (name, email, token) => {
       <hr style="border:1px solid #27272a;margin:32px 0;" />
       <p style="color:#52525b;font-size:11px;text-align:center;">NutriMind OS — AI-Powered Health Intelligence</p>
     </div>
-  `);
+  `,
+  );
 };
 
 export const sendWelcomeEmail = async (name, email) => {
-  return sendMail(email, 'Welcome to NutriMind OS! 🎉', `
+  return sendMail(
+    email,
+    "Welcome to NutriMind OS! 🎉",
+    `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#09090b;color:#fafafa;padding:40px;border-radius:16px;">
       <div style="text-align:center;margin-bottom:32px;">
         <h1 style="color:#0ea5e9;font-size:28px;margin:0;">NutriMind <span style="color:#8b5cf6;">OS</span></h1>
@@ -71,10 +85,11 @@ export const sendWelcomeEmail = async (name, email) => {
         <li>💪 Follow your personalized workout plan</li>
       </ul>
       <div style="text-align:center;margin:32px 0;">
-        <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);color:white;padding:16px 40px;border-radius:50px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;">
+        <a href="${process.env.CLIENT_URL || "http://localhost:5173"}" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);color:white;padding:16px 40px;border-radius:50px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;">
           Open NutriMind OS →
         </a>
       </div>
     </div>
-  `);
+  `,
+  );
 };
