@@ -289,6 +289,7 @@ router.get('/meal-log', async (req, res) => {
 // ─── GET /api/user/analytics ─────────────────────────────────────────────────
 router.get('/analytics', async (req, res) => {
   const days = parseInt(req.query.days) || 7;
+  const cutoff = Math.floor(Date.now() / 1000) - days * 86400;
 
   const [dailyTotals, weightLogs, todayByMeal, totalMealsRow, recentDays] = await Promise.all([
     db.prepare(`
@@ -296,13 +297,13 @@ router.get('/analytics', async (req, res) => {
         ROUND(SUM(calories)) as calories, ROUND(SUM(protein)) as protein,
         ROUND(SUM(carbs)) as carbs, ROUND(SUM(fat)) as fat, COUNT(*) as meals_logged
       FROM meal_logs
-      WHERE user_id = ? AND logged_at >= unixepoch('now', '-${days} days')
+      WHERE user_id = ? AND logged_at >= ?
       GROUP BY day ORDER BY day ASC
-    `).all(req.user.id),
+    `).all(req.user.id, cutoff),
     db.prepare(`
       SELECT date(logged_at, 'unixepoch') as day, weight_kg
-      FROM weight_logs WHERE user_id = ? ORDER BY logged_at DESC LIMIT ${days}
-    `).all(req.user.id),
+      FROM weight_logs WHERE user_id = ? ORDER BY logged_at DESC LIMIT ?
+    `).all(req.user.id, days),
     db.prepare(`
       SELECT meal_type, ROUND(SUM(calories)) as calories, ROUND(SUM(protein)) as protein
       FROM meal_logs
