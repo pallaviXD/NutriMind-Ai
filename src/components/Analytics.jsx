@@ -20,7 +20,9 @@ const Analytics = () => {
       const res = await fetch(`/api/user/analytics?days=${days}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const d = await res.json();
+      if (!res.ok) throw new Error("Request failed");
+if (!res.ok) throw new Error("Request failed");
+const d = await res.json();
       setData(d);
     } catch (e) { console.error(e); }
     setLoading(false);
