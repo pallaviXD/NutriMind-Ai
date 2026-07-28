@@ -35,6 +35,9 @@ const Kitchen = () => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ pantry, mealType, calsLeft, proteinLeft, goal }),
       });
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.statusText}`);
+      }
       const data = await res.json();
       if (data.recipe) setRecipe(data.recipe);
       else setError(data.error || 'Failed to generate recipe');
