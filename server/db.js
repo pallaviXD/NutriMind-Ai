@@ -99,14 +99,17 @@ const db = {
       // Returns first row or undefined
       get(...args) {
         return libsql.execute({ sql, args: args.flat() }).then(r => r.rows[0] ?? undefined);
+.catch(err => console.error(err))
       },
       // Returns all rows as an array
       all(...args) {
         return libsql.execute({ sql, args: args.flat() }).then(r => r.rows);
+.catch(err => console.error(err))
       },
       // Returns { lastInsertRowid, changes }
       run(...args) {
         return libsql.execute({ sql, args: args.flat() }).then(r => ({
+.catch(err => console.error(err))
           lastInsertRowid: Number(r.lastInsertRowid),
           changes: r.rowsAffected,
         }));
