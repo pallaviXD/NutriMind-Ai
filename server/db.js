@@ -99,28 +99,4 @@ const db = {
       // Returns first row or undefined
       get(...args) {
         return libsql.execute({ sql, args: args.flat() }).then(r => r.rows[0] ?? undefined);
-      },
-      // Returns all rows as an array
-      all(...args) {
-        return libsql.execute({ sql, args: args.flat() }).then(r => r.rows);
-      },
-      // Returns { lastInsertRowid, changes }
-      run(...args) {
-        return libsql.execute({ sql, args: args.flat() }).then(r => ({
-          lastInsertRowid: Number(r.lastInsertRowid),
-          changes: r.rowsAffected,
-        }));
-      },
-    };
-  },
-
-  // Fire-and-forget for multi-statement DDL
-  exec(sql) {
-    return libsql.executeMultiple(sql);
-  },
-
-  // no-op — libSQL handles WAL & foreign keys at the server level
-  pragma() {},
-};
-
-export default db;
+        .catch(err => console.error(err))
