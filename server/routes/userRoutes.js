@@ -288,7 +288,7 @@ router.get('/meal-log', async (req, res) => {
 
 // ─── GET /api/user/analytics ─────────────────────────────────────────────────
 router.get('/analytics', async (req, res) => {
-  const days = parseInt(req.query.days) || 7;
+  const days = parseInt(req.query.days, 10) || 7;
 
   const [dailyTotals, weightLogs, todayByMeal, totalMealsRow, recentDays] = await Promise.all([
     db.prepare(`
@@ -342,7 +342,7 @@ router.post('/water-log', async (req, res) => {
   await db.prepare(`
     INSERT INTO water_logs (user_id, glasses, logged_date) VALUES (?, ?, ?)
     ON CONFLICT(user_id, logged_date) DO UPDATE SET glasses = excluded.glasses
-  `).run(req.user.id, Math.max(0, parseInt(glasses) || 0), today);
+  `).run(req.user.id, Math.max(0, parseInt(glasses, 10) || 0), today);
   res.json({ success: true, glasses });
 });
 

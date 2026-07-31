@@ -132,7 +132,7 @@ router.get('/workout-plan/latest', async (req, res) => {
 
 // ─── GET /api/user/workout-plan/history ───────────────────────────────────────
 router.get('/workout-plan/history', async (req, res) => {
-  const limit = parseInt(req.query.limit) || 10;
+  const limit = parseInt(req.query.limit, 10) || 10;
   const plans = await db.prepare(
     'SELECT id, request_hash, version, created_at FROM workout_plans WHERE user_id = ? ORDER BY created_at DESC LIMIT ?'
   ).all(req.user.id, limit);
