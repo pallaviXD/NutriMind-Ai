@@ -97,27 +97,4 @@ export const AuthProvider = ({ children }) => {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ weight_kg, notes }),
     }).then(r => r.json());
-  };
-
-  const logout = () => {
-    localStorage.removeItem('nm_token');
-    localStorage.removeItem('nm_user');
-    setUser(null);
-    setProfile(null);
-  };
-
-  // null = not loaded yet, false = loaded but incomplete, true = complete
-  const isProfileComplete = profile === null ? null : !!(profile?.height_cm && profile?.weight_kg);
-
-  return (
-    <AuthContext.Provider value={{
-      user, profile, loading,
-      isAuthenticated: !!user,
-      isProfileComplete,
-      signup, login, logout, updateProfile, logWeight, getStats,
-      refreshProfile: () => fetchProfile(localStorage.getItem('nm_token')),
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+    .catch(err => console.error(err))
