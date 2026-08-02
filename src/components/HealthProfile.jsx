@@ -105,7 +105,8 @@ const HealthProfile = () => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ goal: selected, details }),
       });
-      const data = await res.json();
+      if (!res.ok) throw new Error("Request failed");
+const data = await res.json();
       if (data.advice) setAiAdvice(data.advice);
     } catch (e) { console.error(e); }
     setLoadingAdvice(false);
@@ -211,7 +212,7 @@ const HealthProfile = () => {
               <ShieldAlert size={16} className="text-yellow-400" /> Health Conditions
             </h2>
             <div className="flex flex-wrap gap-2">
-              {CONDITIONS.map(c => (
+              {(CONDITIONS ?? []).map(c => (
                 <button key={c} onClick={() => toggleCondition(c)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all
                     ${details.health_conditions.includes(c)

@@ -35,7 +35,8 @@ const Kitchen = () => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ pantry, mealType, calsLeft, proteinLeft, goal }),
       });
-      const data = await res.json();
+      if (!res.ok) throw new Error("Request failed");
+const data = await res.json();
       if (data.recipe) setRecipe(data.recipe);
       else setError(data.error || 'Failed to generate recipe');
     } catch (e) {
@@ -65,7 +66,7 @@ const Kitchen = () => {
           </form>
 
           <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-            {pantry.map((item, idx) => (
+            {(pantry ?? []).map((item, idx) => (
               <div key={idx} className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-background/50 border border-border/50 group hover:border-accent-cyan/30 transition-colors">
                 <span className="text-sm font-medium">{item}</span>
                 <button onClick={() => setPantry(pantry.filter((_, i) => i !== idx))}
