@@ -212,7 +212,7 @@ const data = await res.json();
               <ShieldAlert size={16} className="text-yellow-400" /> Health Conditions
             </h2>
             <div className="flex flex-wrap gap-2">
-              {CONDITIONS.map(c => (
+              {(CONDITIONS ?? []).map(c => (
                 <button key={c} onClick={() => toggleCondition(c)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all
                     ${details.health_conditions.includes(c)
