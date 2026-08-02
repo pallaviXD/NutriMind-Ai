@@ -105,7 +105,8 @@ const HealthProfile = () => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ goal: selected, details }),
       });
-      const data = await res.json();
+      if (!res.ok) throw new Error("Request failed");
+const data = await res.json();
       if (data.advice) setAiAdvice(data.advice);
     } catch (e) { console.error(e); }
     setLoadingAdvice(false);
