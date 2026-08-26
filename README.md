@@ -114,7 +114,51 @@ nutrimind-ai/
 | GET | /api/user/analytics | Aggregated nutrition data |
 | POST | /api/user/workout-plan | Generate / fetch cached AI workout plan |
 | GET | /api/user/workout-plan/latest | Most recent plan |
-| GET | /api/health | Health check |
+| GET | /api/health | Health check — verifies DB connectivity, returns `{ status, db, uptime, timestamp }` (503 when DB is unreachable) |
+
+## Health Checks & Monitoring
+
+### How `/api/health` works
+
+`GET /api/health` runs a real `SELECT 1` against the database on every call:
+
+```json
+{
+  "status": "ok",
+  "db": "connected",
+  "uptime": 3600,
+  "timestamp": "2026-08-07T12:00:00Z"
+}
+```
+
+- `200` — app is up **and** the DB is reachable (`"status": "ok"`).
+- `503` — the app is running but the DB query failed (`"status": "degraded"`), so monitors alert instead of silently reporting green.
+
+### Cloud Run probes
+
+[`service.yaml`](service.yaml) wires this endpoint into Cloud Run's Knative health probes:
+
+- `startupProbe` → traffic is only routed once `/api/health` answers, so a broken deployment never receives users.
+- `livenessProbe` → if the endpoint stops responding, Cloud Run restarts the container automatically.
+
+Deploy it with:
+
+```bash
+gcloud run services replace service.yaml --region=us-central1
+```
+
+### Uptime monitoring (free)
+
+Cloud Run scales to zero and its liveness probe restarts containers internally, but neither tells *you* that the service is down. Add a free external monitor so you get alerted:
+
+1. Create a free account at [UptimeRobot](https://uptimerobot.com) (or use Google Cloud Monitoring uptime checks).
+2. Add a monitor:
+   - **Type:** HTTP(s)
+   - **URL:** your deployed service URL + `/api/health` (e.g. `https://nutrimind-ai-xxxx-uc.a.run.app/api/health`)
+   - **Interval:** 5 minutes
+3. Optional: configure an alert contact (email / Slack / webhook). Because the endpoint returns `503` on DB failure, any keyword or status-code monitoring will catch database outages too.
+
+> Local development: `curl http://localhost:3001/api/health` should return `"status": "ok", "db": "connected"`.
 
 ---
 
