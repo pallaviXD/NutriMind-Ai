@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dbHandle from './db.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import workoutRoutes from './routes/workoutRoutes.js';
@@ -27,8 +28,25 @@ const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { er
 app.use('/api/', limiter);
 app.use('/api/auth/', authLimiter);
 
-// Health check
-app.get('/api/health', (_, res) => res.json({ status: 'ok', ts: Date.now() }));
+// Health check — verifies DB connectivity, used by Cloud Run livenessProbe
+// and external uptime monitors (see README "Health Checks & Monitoring")
+const startedAt = Date.now();
+app.get('/api/health', async (_, res) => {
+  let db = 'disconnected';
+  try {
+    await dbHandle.exec('SELECT 1');
+    db = 'connected';
+  } catch (err) {
+    console.error('Health check DB failure:', err.message);
+  }
+  const healthy = db === 'connected';
+  res.status(healthy ? 200 : 503).json({
+    status: healthy ? 'ok' : 'degraded',
+    db,
+    uptime: Math.floor((Date.now() - startedAt) / 1000),
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);

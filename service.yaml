@@ -1,0 +1,48 @@
+# Cloud Run service definition with health probes wired to /api/health.
+#
+# Deploy with:
+#   gcloud run services replace service.yaml --region=us-central1
+#   gcloud run services update nutrimind-ai --region=us-central1 \
+#     --set-env-vars=NODE_ENV=production,PORT=8080,JWT_SECRET=<SECRET>,GROQ_API_KEY=<KEY>,CLIENT_URL=<URL>,TURSO_DATABASE_URL=<URL>,TURSO_AUTH_TOKEN=<TOKEN>
+#
+# (Secrets are applied separately so they are never committed to git.)
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: nutrimind-ai
+  labels:
+    cloud.googleapis.com/location: us-central1
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: '0'
+        autoscaling.knative.dev/maxScale: '10'
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      containers:
+        - image: gcr.io/PROJECT_ID/nutrimind-ai
+          ports:
+            - name: http1
+              containerPort: 8080
+          resources:
+            limits:
+              cpu: 1
+              memory: 512Mi
+          # Startup probe: gate traffic until the server can reach the DB
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 12
+          # Liveness probe: restart the container if /api/health stops answering
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
