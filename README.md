@@ -1,6 +1,6 @@
 # NutriMind OS 🧬
 
-> AI-powered personal health intelligence platform — full-stack React + Node.js + Groq Llama 3.3 70B.
+> AI-powered personal health intelligence platform - full-stack React + Node.js + Groq Llama 3.3 70B.
 
 NutriMind OS is your personal AI health coach. Log meals through natural conversation, get AI-generated recipes from your pantry, track macros and calories in real time, and receive personalized nutrition advice based on your body, health conditions, and goals.
 
@@ -12,18 +12,23 @@ NutriMind OS is your personal AI health coach. Log meals through natural convers
 
 💻 GitHub: [https://github.com/pallaviXD/NutriMind-Ai](https://github.com/pallaviXD/NutriMind-Ai)
 
+🔑 **Demo Account Credentials:**
+- **Email:** `demo@nutrimind.ai`
+- **Password:** `demo123`
+- Or click **"Try Demo Account"** directly on the sign-in page for instant one-click access.
+
 ---
 
 ## Features
 
-- **AI Chat Coach** — Log meals in plain English. AI parses food, estimates calories + macros, updates your dashboard live.
-- **AI Kitchen** — Add ingredients to your pantry, get a full recipe with macros and steps tailored to your health goal.
-- **Real Analytics** — Charts from your actual meal logs. Calorie trends, macro breakdowns, weight history, streak counter.
-- **Health Profiles** — Gym, Weight Loss, Diabetes Care, Cardiac Health, General Wellness — AI adapts to each.
-- **Body Stats** — BMI, BMR, TDEE, ideal weight range, body fat estimate from your profile.
-- **Workout Planner** — AI-generated 7-day plans, cached per profile so it's instant on revisit.
-- **Water & Weight Tracking** — Daily water intake logger and persistent weight log with trend charts.
-- **Email Verification** — Full token-based email verification flow on signup.
+- **AI Chat Coach** - Log meals in plain English. AI parses food, estimates calories + macros, updates your dashboard live.
+- **AI Kitchen** - Add ingredients to your pantry, get a full recipe with macros and steps tailored to your health goal.
+- **Real Analytics** - Charts from your actual meal logs. Calorie trends, macro breakdowns, weight history, streak counter.
+- **Health Profiles** - Gym, Weight Loss, Diabetes Care, Cardiac Health, General Wellness - AI adapts to each.
+- **Body Stats** - BMI, BMR, TDEE, ideal weight range, body fat estimate from your profile.
+- **Workout Planner** - AI-generated 7-day plans, cached per profile so it's instant on revisit.
+- **Water & Weight Tracking** - Daily water intake logger and persistent weight log with trend charts.
+- **Instant Authentication** - Seamless JWT-based signup and login with one-click demo access.
 
 ---
 
@@ -49,12 +54,11 @@ NutriMind OS is your personal AI health coach. Log meals through natural convers
 ```
 nutrimind-ai/
 ├── server/
-│   ├── index.js              # Express app — security, rate limiting, static serving
+│   ├── index.js              # Express app - security, rate limiting, static serving
 │   ├── auth.js               # JWT sign/verify + auth middleware
-│   ├── db.js                 # Turso/libSQL schema & async DB client
-│   ├── mailer.js             # Nodemailer (optional email verification)
+│   ├── db.js                 # Turso/libSQL schema, seed demo user & async DB client
 │   └── routes/
-│       ├── authRoutes.js     # POST /signup, GET /verify/:token, POST /login
+│       ├── authRoutes.js     # POST /signup, POST /login
 │       ├── userRoutes.js     # profile, stats, chat, recipe, health-advice,
 │       │                     # meal-log, weight-log, water-log, analytics
 │       └── workoutRoutes.js  # AI workout plan generation + caching
@@ -77,13 +81,12 @@ nutrimind-ai/
 │   │   └── GlobalContext.jsx # Nutrition state, AI processing
 │   ├── pages/
 │   │   ├── LandingPage.jsx   # Public landing page with WebGL smoke hero
-│   │   ├── LoginPage.jsx
-│   │   ├── SignupPage.jsx
-│   │   ├── SetupProfile.jsx
-│   │   └── VerifyEmailPage.jsx
+│   │   ├── LoginPage.jsx     # Login with demo account button
+│   │   ├── SignupPage.jsx    # Direct instant signup
+│   │   └── SetupProfile.jsx
 │   ├── services/
 │   │   └── aiService.js      # Calls /api/user/chat, offline fallback
-│   └── App.jsx               # Routes — / landing, /app/* protected
+│   └── App.jsx               # Routes - / landing, /app/* protected
 ├── Dockerfile
 ├── render.yaml               # Render deployment config
 ├── .env.example
@@ -96,9 +99,8 @@ nutrimind-ai/
 
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | /api/auth/signup | Register — sends verification email |
-| GET | /api/auth/verify/:token | Verify email token |
-| POST | /api/auth/login | Login, returns JWT |
+| POST | /api/auth/signup | Register - creates account & returns JWT |
+| POST | /api/auth/login | Login with email + password or demo account |
 | GET | /api/user/profile | Get user + profile |
 | PUT | /api/user/profile | Update profile |
 | GET | /api/user/stats | BMI, BMR, TDEE, ideal weight |
@@ -122,8 +124,8 @@ nutrimind-ai/
 
 ### Prerequisites
 - Node.js 18+
-- Free [Groq API key](https://console.groq.com) — no credit card needed
-- Free [Turso database](https://app.turso.tech) — for persistent storage
+- Free [Groq API key](https://console.groq.com) - no credit card needed
+- Free [Turso database](https://app.turso.tech) - for persistent storage
 
 ### 1. Clone & install
 
@@ -191,19 +193,17 @@ This project ships with a `render.yaml` blueprint.
 | `TURSO_DATABASE_URL` | Prod | `libsql://your-db.turso.io` |
 | `TURSO_AUTH_TOKEN` | Prod | Turso auth token |
 | `PORT` | No | Defaults to 3001 locally, set by platform in prod |
-| `CLIENT_URL` | No | Frontend URL for email links |
-| `EMAIL_USER` | No | Gmail for email verification |
-| `EMAIL_PASS` | No | Gmail App Password |
+| `CLIENT_URL` | No | Frontend URL |
 
 ---
 
 ## Security
 
 - HTTP headers via `helmet`
-- Rate limiting — 100 req/15min general, 20 req/15min on auth
+- Rate limiting - 100 req/15min general, 20 req/15min on auth
 - Passwords hashed with `bcryptjs` (12 rounds)
-- JWT tokens — 7 day expiry
-- Parameterized queries — no SQL injection
+- JWT tokens - 7 day expiry
+- Parameterized queries - no SQL injection
 - Body size limited to 10kb
 - No API keys exposed to the browser
 
@@ -211,7 +211,7 @@ This project ships with a `render.yaml` blueprint.
 
 ## How the AI Works
 
-All AI runs server-side — no keys in the browser.
+All AI runs server-side - no keys in the browser.
 
 1. User sends a message
 2. Frontend calls `POST /api/user/chat` with message + full context (calories, macros, meals, pantry, profile, chat history)

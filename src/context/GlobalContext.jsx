@@ -132,22 +132,22 @@ export const GlobalProvider = ({ children }) => {
       case 'gym':
         newTargets = { targetProtein: 180, targetCarbs: 220, targetFat: 70 };
         setCalories(prev => ({ ...prev, target: 2800 }));
-        setProfileLabel('Gym Mode — Hypertrophy');
+        setProfileLabel('Gym Mode - Hypertrophy');
         break;
       case 'diabetes':
         newTargets = { targetProtein: 130, targetCarbs: 130, targetFat: 60 };
         setCalories(prev => ({ ...prev, target: 1800 }));
-        setProfileLabel('Diabetic Protocol — Low GI');
+        setProfileLabel('Diabetic Protocol - Low GI');
         break;
       case 'weight_loss':
         newTargets = { targetProtein: 160, targetCarbs: 150, targetFat: 55 };
         setCalories(prev => ({ ...prev, target: 1600 }));
-        setProfileLabel('Fat-Loss Engine — Deficit Mode');
+        setProfileLabel('Fat-Loss Engine - Deficit Mode');
         break;
       case 'heart':
         newTargets = { targetProtein: 120, targetCarbs: 200, targetFat: 45 };
         setCalories(prev => ({ ...prev, target: 1900 }));
-        setProfileLabel('Cardiac Care — Low Sodium Plan');
+        setProfileLabel('Cardiac Care - Low Sodium Plan');
         break;
       case 'custom':
         newTargets = {

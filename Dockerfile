@@ -12,7 +12,7 @@ COPY . .
 # Build the React frontend
 RUN npm run build
 
-# Drop devDeps after build — no native modules so no rebuild needed
+# Drop devDeps after build - no native modules so no rebuild needed
 RUN npm prune --production
 
 EXPOSE 8080

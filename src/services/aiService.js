@@ -1,4 +1,4 @@
-// NutriMind OS — AI Service (calls backend /api/user/chat → Groq Llama 3.3 70B)
+// NutriMind OS - AI Service (calls backend /api/user/chat → Groq Llama 3.3 70B)
 
 export const simulateLocalAI = async (input, context) => {
   const token = localStorage.getItem('nm_token');
@@ -56,7 +56,7 @@ export const simulateLocalAI = async (input, context) => {
   }
 };
 
-// ─── Offline fallback — ONLY used when fetch itself throws (true network failure)
+// ─── Offline fallback - ONLY used when fetch itself throws (true network failure)
 const FOOD_DB = {
   chicken: { cal: 165, p: 31, c: 0, f: 3.6 },
   rice:    { cal: 130, p: 2.7, c: 28, f: 0.3 },

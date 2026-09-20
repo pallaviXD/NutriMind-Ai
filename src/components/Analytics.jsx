@@ -66,8 +66,8 @@ const Analytics = () => {
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 shrink-0">
-        <StatCard icon={<Flame size={18} className="text-orange-400" />} label="Avg Daily Calories" value={avgCalories || '—'} unit="kcal" color="border-l-orange-400" />
-        <StatCard icon={<Zap size={18} className="text-accent-neon" />} label="Avg Protein" value={avgProtein || '—'} unit="g/day" color="border-l-accent-neon" />
+        <StatCard icon={<Flame size={18} className="text-orange-400" />} label="Avg Daily Calories" value={avgCalories || '-'} unit="kcal" color="border-l-orange-400" />
+        <StatCard icon={<Zap size={18} className="text-accent-neon" />} label="Avg Protein" value={avgProtein || '-'} unit="g/day" color="border-l-accent-neon" />
         <StatCard icon={<Award size={18} className="text-yellow-400" />} label="Logging Streak" value={data?.streak || 0} unit="days" color="border-l-yellow-400" />
         <StatCard icon={<Calendar size={18} className="text-accent-purple" />} label="Total Meals Logged" value={data?.totalMeals || 0} unit="meals" color="border-l-accent-purple" />
       </div>

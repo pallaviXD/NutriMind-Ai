@@ -1,23 +1,19 @@
 import { createClient } from '@libsql/client';
+import bcrypt from 'bcryptjs';
 
 // ─── Turso / libSQL client ────────────────────────────────────────────────────
 // Production: set TURSO_DATABASE_URL + TURSO_AUTH_TOKEN env vars (Turso cloud)
 // Local dev:  uses a local SQLite file automatically (no env vars needed)
-const url  = process.env.TURSO_DATABASE_URL  || 'file:./server/nutrimind.db';
+const remoteUrl = process.env.TURSO_DATABASE_URL;
 const authToken = process.env.TURSO_AUTH_TOKEN || undefined;
 
-const libsql = createClient({ url, authToken });
-
-// ─── Bootstrap schema ─────────────────────────────────────────────────────────
-// libSQL is async — we run migrations at startup and export a thin sync-style
-// wrapper so none of the existing route code needs to change.
-await libsql.executeMultiple(`
+const schemaSql = `
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    is_verified INTEGER DEFAULT 0,
+    is_verified INTEGER DEFAULT 1,
     verify_token TEXT,
     verify_token_expires INTEGER,
     reset_token TEXT,
@@ -81,7 +77,49 @@ await libsql.executeMultiple(`
   );
 
   CREATE INDEX IF NOT EXISTS idx_wp_user_hash ON workout_plans(user_id, request_hash);
-`);
+`;
+
+let localFallbackClient = null;
+function getLocalFallback() {
+  if (!localFallbackClient) {
+    localFallbackClient = createClient({ url: 'file:./server/nutrimind.db' });
+  }
+  return localFallbackClient;
+}
+
+async function safeExecute(query) {
+  try {
+    return await libsql.execute(query);
+  } catch (err) {
+    const local = getLocalFallback();
+    if (libsql !== local) {
+      console.warn('⚠️ Turso connection error, seamlessly switching to local SQLite:', err.message);
+      try {
+        await local.executeMultiple(schemaSql);
+      } catch {}
+      libsql = local;
+      return await libsql.execute(query);
+    }
+    throw err;
+  }
+}
+
+async function setupClient() {
+  if (remoteUrl) {
+    try {
+      const client = createClient({ url: remoteUrl, authToken });
+      await client.executeMultiple(schemaSql);
+      return client;
+    } catch (err) {
+      console.warn('⚠️ Remote Turso database connection issue, using local SQLite:', err.message);
+    }
+  }
+  const localClient = getLocalFallback();
+  await localClient.executeMultiple(schemaSql);
+  return localClient;
+}
+
+let libsql = await setupClient();
 
 // ─── Sync-style wrapper ───────────────────────────────────────────────────────
 // The existing routes use better-sqlite3's synchronous API:
@@ -98,15 +136,15 @@ const db = {
     return {
       // Returns first row or undefined
       get(...args) {
-        return libsql.execute({ sql, args: args.flat() }).then(r => r.rows[0] ?? undefined);
+        return safeExecute({ sql, args: args.flat() }).then(r => r.rows[0] ?? undefined);
       },
       // Returns all rows as an array
       all(...args) {
-        return libsql.execute({ sql, args: args.flat() }).then(r => r.rows);
+        return safeExecute({ sql, args: args.flat() }).then(r => r.rows);
       },
       // Returns { lastInsertRowid, changes }
       run(...args) {
-        return libsql.execute({ sql, args: args.flat() }).then(r => ({
+        return safeExecute({ sql, args: args.flat() }).then(r => ({
           lastInsertRowid: Number(r.lastInsertRowid),
           changes: r.rowsAffected,
         }));
@@ -119,8 +157,52 @@ const db = {
     return libsql.executeMultiple(sql);
   },
 
-  // no-op — libSQL handles WAL & foreign keys at the server level
+  // no-op - libSQL handles WAL & foreign keys at the server level
   pragma() {},
 };
+
+// Ensure all existing accounts are verified and demo user is available
+try {
+  await safeExecute(`UPDATE users SET is_verified = 1 WHERE is_verified = 0`);
+} catch {}
+
+try {
+  const existing = await safeExecute({
+    sql: 'SELECT id FROM users WHERE email = ?',
+    args: ['demo@nutrimind.ai']
+  });
+
+  if (!existing.rows || existing.rows.length === 0) {
+    const hash = await bcrypt.hash('demo123', 10);
+    const userRes = await safeExecute({
+      sql: `INSERT INTO users (name, email, password_hash, is_verified) VALUES (?, ?, ?, 1)`,
+      args: ['Demo User', 'demo@nutrimind.ai', hash]
+    });
+    const demoId = Number(userRes.lastInsertRowid);
+
+    await safeExecute({
+      sql: `INSERT INTO profiles (
+        user_id, date_of_birth, gender, height_cm, weight_kg, body_fat_pct,
+        activity_level, health_goal, health_conditions, target_weight_kg
+      ) VALUES (?, '1998-05-15', 'female', 168, 62, 21, 'moderate', 'gym', '[]', 60)`,
+      args: [demoId]
+    });
+
+    await safeExecute({
+      sql: `INSERT INTO meal_logs (user_id, food_name, calories, protein, carbs, fat, meal_type)
+            VALUES (?, 'Oatmeal with berries & almond butter', 380, 14, 52, 12, 'breakfast'),
+                   (?, 'Grilled chicken quinoa bowl with avocado', 550, 42, 48, 18, 'lunch')`,
+      args: [demoId, demoId]
+    });
+
+    await safeExecute({
+      sql: `INSERT INTO water_logs (user_id, glasses, logged_date) VALUES (?, 5, date('now'))`,
+      args: [demoId]
+    });
+    console.log('✅ Demo account ready: demo@nutrimind.ai / demo123');
+  }
+} catch (err) {
+  console.warn('Demo user setup note:', err.message);
+}
 
 export default db;

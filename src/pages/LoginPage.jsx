@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Activity, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
+import { Activity, Eye, EyeOff, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const LoginPage = () => {
@@ -15,6 +15,24 @@ const LoginPage = () => {
   const handleChange = (e) => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
     setError('');
+  };
+
+  const handleDemoLogin = async () => {
+    const demoCreds = { email: 'demo@nutrimind.ai', password: 'demo123' };
+    setForm(demoCreds);
+    setLoading(true);
+    setError('');
+    try {
+      const data = await login(demoCreds);
+      if (data.error) {
+        setError(data.error);
+      } else {
+        navigate(data.profileComplete ? '/app' : '/setup-profile');
+      }
+    } catch {
+      setError('Unable to sign in with demo account. Please try again.');
+    }
+    setLoading(false);
   };
 
   const handleSubmit = async (e) => {
@@ -98,8 +116,28 @@ const LoginPage = () => {
               type="submit" disabled={loading}
               className="w-full bg-gradient-to-r from-accent-neon to-accent-purple text-white font-bold py-3 rounded-xl hover:shadow-[0_0_25px_rgba(139,92,246,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {loading ? <><Loader2 size={18} className="animate-spin" /> Signing in…</> : 'Sign In →'}
+              {loading ? <><Loader2 size={18} className="animate-spin" /> Signing in...</> : 'Sign In →'}
             </button>
+
+            <div className="relative flex items-center justify-center my-4">
+              <div className="border-t border-border w-full" />
+              <span className="bg-panel px-3 text-xs text-muted uppercase tracking-wider shrink-0">or demo access</span>
+              <div className="border-t border-border w-full" />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              disabled={loading}
+              className="w-full bg-panel/80 hover:bg-panel border border-accent-neon/40 hover:border-accent-neon text-foreground font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group hover:shadow-[0_0_20px_rgba(34,197,94,0.15)]"
+            >
+              <Sparkles size={16} className="text-accent-neon group-hover:rotate-12 transition-transform" />
+              <span>Try Demo Account</span>
+            </button>
+
+            <div className="p-3 bg-accent-neon/5 border border-accent-neon/20 rounded-xl text-xs text-center text-muted">
+              <span className="font-semibold text-accent-neon">Demo email:</span> demo@nutrimind.ai &bull; <span className="font-semibold text-accent-neon">Password:</span> demo123
+            </div>
           </form>
 
           <p className="text-center text-sm text-muted mt-6">

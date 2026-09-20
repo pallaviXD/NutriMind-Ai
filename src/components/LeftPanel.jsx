@@ -89,7 +89,7 @@ const LeftPanel = () => {
         </h2>
         {user && (
           <p className="text-xs text-muted mt-0.5">
-            Hey {user.name?.split(' ')[0]} 👋 — {profile?.health_goal ? `${profile.health_goal.replace('_', ' ')} mode` : 'tell me anything'}
+            Hey {user.name?.split(' ')[0]} 👋 - {profile?.health_goal ? `${profile.health_goal.replace('_', ' ')} mode` : 'tell me anything'}
           </p>
         )}
       </div>

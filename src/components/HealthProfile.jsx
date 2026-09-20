@@ -184,11 +184,11 @@ const HealthProfile = () => {
                 <label className="text-xs text-muted uppercase tracking-wider font-semibold block mb-2">Activity Level</label>
                 <select value={details.activity_level} onChange={e => set('activity_level', e.target.value)}
                   className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent-neon/60 transition-all">
-                  <option value="sedentary">Sedentary — desk job, little exercise</option>
-                  <option value="light">Light — 1-3x/week</option>
-                  <option value="moderate">Moderate — 3-5x/week</option>
-                  <option value="active">Active — 6-7x/week</option>
-                  <option value="very_active">Very Active — physical job + training</option>
+                  <option value="sedentary">Sedentary - desk job, little exercise</option>
+                  <option value="light">Light - 1-3x/week</option>
+                  <option value="moderate">Moderate - 3-5x/week</option>
+                  <option value="active">Active - 6-7x/week</option>
+                  <option value="very_active">Very Active - physical job + training</option>
                 </select>
               </div>
             </div>

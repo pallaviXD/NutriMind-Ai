@@ -17,7 +17,7 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import SetupProfile from './pages/SetupProfile';
 import LandingPage from './pages/LandingPage';
 
-// Protect routes — redirects to /login if not authed
+// Protect routes - redirects to /login if not authed
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading, isProfileComplete } = useAuth();
   const location = useLocation();

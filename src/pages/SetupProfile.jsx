@@ -151,11 +151,11 @@ const SetupProfile = () => {
                   <select value={data.activity_level} onChange={e => set('activity_level', e.target.value)}
                     className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-accent-neon/60 transition-all"
                   >
-                    <option value="sedentary">Sedentary — desk job, little exercise</option>
-                    <option value="light">Light — exercise 1-3x/week</option>
-                    <option value="moderate">Moderate — exercise 3-5x/week</option>
-                    <option value="active">Active — hard exercise 6-7x/week</option>
-                    <option value="very_active">Very Active — physical job + training</option>
+                    <option value="sedentary">Sedentary - desk job, little exercise</option>
+                    <option value="light">Light - exercise 1-3x/week</option>
+                    <option value="moderate">Moderate - exercise 3-5x/week</option>
+                    <option value="active">Active - hard exercise 6-7x/week</option>
+                    <option value="very_active">Very Active - physical job + training</option>
                   </select>
                 </div>
               </div>

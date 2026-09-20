@@ -11,7 +11,6 @@ const SignupPage = () => {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [verificationSent, setVerificationSent] = useState(false);
 
   const handleChange = (e) => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -26,12 +25,7 @@ const SignupPage = () => {
     setError('');
     try {
       const data = await signup(form);
-      if (data.requiresVerification) {
-        setVerificationSent(true);
-      } else if (data.token) {
-        // Auto-login fallback
-        localStorage.setItem('nm_token', data.token);
-        localStorage.setItem('nm_user', JSON.stringify(data.user));
+      if (data.token || data.success) {
         navigate('/setup-profile');
       } else {
         setError(data.error || 'Signup failed.');
@@ -61,23 +55,8 @@ const SignupPage = () => {
         </div>
 
         <div className="glass-panel p-8">
-          {verificationSent ? (
-            <div className="text-center py-4">
-              <div className="w-16 h-16 bg-green-500/10 border-2 border-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle2 size={32} className="text-green-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Check your email</h2>
-              <p className="text-muted text-sm mb-8">
-                We've sent a verification link to <strong className="text-foreground">{form.email}</strong>.<br/><br/>Please click the link to activate your account.
-              </p>
-              <Link to="/login" className="w-full inline-block bg-gradient-to-r from-accent-neon to-accent-purple text-white font-bold py-3 rounded-xl hover:shadow-[0_0_25px_rgba(139,92,246,0.4)] transition-all">
-                Go to Sign In →
-              </Link>
-            </div>
-          ) : (
-            <>
-              <h1 className="text-2xl font-bold mb-1">Create your account</h1>
-              <p className="text-muted text-sm mb-7">Free forever. No credit card needed.</p>
+          <h1 className="text-2xl font-bold mb-1">Create your account</h1>
+          <p className="text-muted text-sm mb-7">Free forever. Instant access - no verification needed.</p>
 
               {error && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
@@ -132,8 +111,6 @@ const SignupPage = () => {
                   Sign in
                 </Link>
               </p>
-            </>
-          )}
         </div>
       </motion.div>
     </div>

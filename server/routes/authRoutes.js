@@ -21,31 +21,28 @@ router.post('/signup', async (req, res) => {
     if (!emailRegex.test(email))
       return res.status(400).json({ error: 'Invalid email address.' });
 
-    const existing = await db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase());
+    const existing = await db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase().trim());
     if (existing)
       return res.status(409).json({ error: 'An account with this email already exists.' });
 
     const hash = await bcrypt.hash(password, 12);
-    const verifyToken = crypto.randomBytes(32).toString('hex');
-    const verifyExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
     const { lastInsertRowid } = await db.prepare(`
-      INSERT INTO users (name, email, password_hash, is_verified, verify_token, verify_token_expires)
-      VALUES (?, ?, ?, 0, ?, ?)
-    `).run(name.trim(), email.toLowerCase().trim(), hash, verifyToken, verifyExpires);
+      INSERT INTO users (name, email, password_hash, is_verified)
+      VALUES (?, ?, ?, 1)
+    `).run(name.trim(), email.toLowerCase().trim(), hash);
 
     await db.prepare('INSERT INTO profiles (user_id) VALUES (?)').run(lastInsertRowid);
 
-    try {
-      await sendVerificationEmail(name.trim(), email.toLowerCase().trim(), verifyToken);
-    } catch (emailErr) {
-      console.error('Failed to send verification email:', emailErr);
-    }
+    const user = { id: lastInsertRowid, name: name.trim(), email: email.toLowerCase().trim() };
+    const token = signToken(user);
 
     res.json({
       success: true,
-      requiresVerification: true,
-      message: 'Registration successful. Please check your email to verify your account.',
+      token,
+      user,
+      profileComplete: false,
+      message: 'Account created successfully!',
     });
   } catch (err) {
     console.error('Signup error:', err);
@@ -55,35 +52,7 @@ router.post('/signup', async (req, res) => {
 
 // ─── GET /api/auth/verify/:token ──────────────────────────────────────────────
 router.get('/verify/:token', async (req, res) => {
-  try {
-    const { token } = req.params;
-    if (!token) return res.status(400).json({ success: false, error: 'Verification token is missing.' });
-
-    const user = await db.prepare(
-      'SELECT id, name, email, is_verified, verify_token_expires FROM users WHERE verify_token = ?'
-    ).get(token);
-
-    if (!user)
-      return res.status(400).json({ success: false, error: 'Invalid verification token.' });
-
-    if (user.is_verified)
-      return res.json({ success: true, message: 'Email already verified. You can sign in.' });
-
-    if (user.verify_token_expires < Date.now())
-      return res.status(400).json({ success: false, error: 'Verification token has expired. Please sign up again.' });
-
-    await db.prepare(
-      'UPDATE users SET is_verified = 1, verify_token = NULL, verify_token_expires = NULL WHERE id = ?'
-    ).run(user.id);
-
-    // Send welcome email async — don't block the response
-    sendWelcomeEmail(user.name, user.email).catch(console.error);
-
-    res.json({ success: true, message: 'Email verified successfully. You can now log in.' });
-  } catch (err) {
-    console.error('Verify error:', err);
-    res.status(500).json({ success: false, error: 'Server error during verification.' });
-  }
+  res.json({ success: true, message: 'Email verification is no longer required. You can log in directly.' });
 });
 
 // ─── POST /api/auth/login ─────────────────────────────────────────────────────
@@ -96,9 +65,6 @@ router.post('/login', async (req, res) => {
     const user = await db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase().trim());
     if (!user)
       return res.status(401).json({ error: 'Invalid email or password.' });
-
-    if (user.is_verified === 0)
-      return res.status(403).json({ error: 'Please verify your email before logging in.' });
 
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid)

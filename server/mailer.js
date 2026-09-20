@@ -4,7 +4,7 @@ dotenv.config();
 
 const createTransport = () => {
   if (!process.env.EMAIL_PASS || process.env.EMAIL_PASS === 'YOUR_APP_PASSWORD_HERE') {
-    console.warn('⚠️  EMAIL_PASS not set in .env — emails will be logged to console only');
+    console.warn('⚠️  EMAIL_PASS not set in .env - emails will be logged to console only');
     return null;
   }
   return nodemailer.createTransport({
@@ -50,7 +50,7 @@ export const sendVerificationEmail = async (name, email, token) => {
       <p style="color:#a1a1aa;font-size:12px;">Or copy this link: <a href="${verifyUrl}" style="color:#0ea5e9;">${verifyUrl}</a></p>
       <p style="color:#a1a1aa;font-size:12px;">This link expires in 24 hours. If you didn't sign up, ignore this email.</p>
       <hr style="border:1px solid #27272a;margin:32px 0;" />
-      <p style="color:#52525b;font-size:11px;text-align:center;">NutriMind OS — AI-Powered Health Intelligence</p>
+      <p style="color:#52525b;font-size:11px;text-align:center;">NutriMind OS - AI-Powered Health Intelligence</p>
     </div>
   `);
 };

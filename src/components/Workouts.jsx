@@ -10,46 +10,46 @@ const STATIC_PLANS = {
     title: 'Hypertrophy Split',
     subtitle: '7-Day Push / Pull / Legs Split',
     days: [
-      { day: 'Day 1 — Push (Chest, Shoulders, Triceps)', exercises: [
+      { day: 'Day 1 - Push (Chest, Shoulders, Triceps)', exercises: [
         { name: 'Barbell Bench Press', sets: 4, reps: '8-10', rest: '90s', muscles: 'Chest' },
         { name: 'Overhead Press', sets: 3, reps: '8-12', rest: '90s', muscles: 'Shoulders' },
         { name: 'Incline Dumbbell Press', sets: 3, reps: '10-12', rest: '60s', muscles: 'Upper Chest' },
         { name: 'Lateral Raises', sets: 4, reps: '12-15', rest: '45s', muscles: 'Deltoids' },
         { name: 'Tricep Rope Pushdown', sets: 3, reps: '12-15', rest: '45s', muscles: 'Triceps' },
       ]},
-      { day: 'Day 2 — Pull (Back, Biceps)', exercises: [
+      { day: 'Day 2 - Pull (Back, Biceps)', exercises: [
         { name: 'Deadlift', sets: 4, reps: '5-6', rest: '3min', muscles: 'Posterior Chain' },
         { name: 'Barbell Rows', sets: 3, reps: '8-10', rest: '90s', muscles: 'Lats / Rhomboids' },
         { name: 'Pull-Ups or Lat Pulldown', sets: 3, reps: '8-12', rest: '90s', muscles: 'Lats' },
         { name: 'Face Pulls', sets: 3, reps: '15-20', rest: '45s', muscles: 'Rear Delts' },
         { name: 'Barbell Curl', sets: 3, reps: '10-12', rest: '60s', muscles: 'Biceps' },
       ]},
-      { day: 'Day 3 — Legs', exercises: [
+      { day: 'Day 3 - Legs', exercises: [
         { name: 'Back Squat', sets: 4, reps: '6-8', rest: '3min', muscles: 'Quads / Glutes' },
         { name: 'Romanian Deadlift', sets: 3, reps: '8-10', rest: '2min', muscles: 'Hamstrings' },
         { name: 'Leg Press', sets: 3, reps: '10-12', rest: '90s', muscles: 'Quads' },
         { name: 'Walking Lunges', sets: 3, reps: '12 each', rest: '60s', muscles: 'Glutes / Quads' },
         { name: 'Calf Raises', sets: 4, reps: '15-20', rest: '45s', muscles: 'Calves' },
       ]},
-      { day: 'Day 4 — Rest / Active Recovery', exercises: [
-        { name: 'Light Jog or Walk', sets: 1, reps: '20 min', rest: '—', muscles: 'Cardio' },
-        { name: 'Full Body Stretching', sets: 1, reps: '15 min', rest: '—', muscles: 'Flexibility' },
+      { day: 'Day 4 - Rest / Active Recovery', exercises: [
+        { name: 'Light Jog or Walk', sets: 1, reps: '20 min', rest: '-', muscles: 'Cardio' },
+        { name: 'Full Body Stretching', sets: 1, reps: '15 min', rest: '-', muscles: 'Flexibility' },
       ]},
-      { day: 'Day 5 — Push (Volume)', exercises: [
+      { day: 'Day 5 - Push (Volume)', exercises: [
         { name: 'Dumbbell Flat Press', sets: 4, reps: '10-12', rest: '60s', muscles: 'Chest' },
         { name: 'Arnold Press', sets: 3, reps: '10-12', rest: '60s', muscles: 'Shoulders' },
         { name: 'Cable Flyes', sets: 3, reps: '12-15', rest: '45s', muscles: 'Chest' },
         { name: 'Overhead Tricep Extension', sets: 3, reps: '12-15', rest: '45s', muscles: 'Triceps' },
       ]},
-      { day: 'Day 6 — Pull (Width)', exercises: [
+      { day: 'Day 6 - Pull (Width)', exercises: [
         { name: 'Wide-Grip Pull-Ups', sets: 4, reps: '8-10', rest: '90s', muscles: 'Lats' },
         { name: 'Seated Cable Row', sets: 3, reps: '10-12', rest: '60s', muscles: 'Mid Back' },
         { name: 'Hammer Curls', sets: 3, reps: '10-12', rest: '60s', muscles: 'Biceps' },
         { name: 'Shrugs', sets: 3, reps: '12-15', rest: '45s', muscles: 'Traps' },
       ]},
-      { day: 'Day 7 — Active Recovery', exercises: [
-        { name: 'Light Jog or Cycle', sets: 1, reps: '20 min', rest: '—', muscles: 'Cardio' },
-        { name: 'Foam Rolling', sets: 1, reps: '10 min', rest: '—', muscles: 'Recovery' },
+      { day: 'Day 7 - Active Recovery', exercises: [
+        { name: 'Light Jog or Cycle', sets: 1, reps: '20 min', rest: '-', muscles: 'Cardio' },
+        { name: 'Foam Rolling', sets: 1, reps: '10 min', rest: '-', muscles: 'Recovery' },
       ]},
     ],
     nutrition: ['Eat 1g protein per lb of bodyweight', 'Caloric surplus of 200-300 kcal', 'Creatine 5g/day', 'Pre-workout meal 90 min before training'],
@@ -58,31 +58,31 @@ const STATIC_PLANS = {
     title: 'General Wellness Plan',
     subtitle: '7-Day Balanced Fitness Plan',
     days: [
-      { day: 'Day 1 — Full Body', exercises: [
+      { day: 'Day 1 - Full Body', exercises: [
         { name: 'Bodyweight Squat', sets: 3, reps: '15', rest: '45s', muscles: 'Legs' },
         { name: 'Push-Ups', sets: 3, reps: '10-15', rest: '45s', muscles: 'Chest' },
         { name: 'Plank', sets: 3, reps: '30-45s', rest: '30s', muscles: 'Core' },
       ]},
-      { day: 'Day 2 — Cardio', exercises: [
-        { name: '20-min brisk walk or jog', sets: 1, reps: '20 min', rest: '—', muscles: 'Cardio' },
+      { day: 'Day 2 - Cardio', exercises: [
+        { name: '20-min brisk walk or jog', sets: 1, reps: '20 min', rest: '-', muscles: 'Cardio' },
       ]},
-      { day: 'Day 3 — Core', exercises: [
+      { day: 'Day 3 - Core', exercises: [
         { name: 'Dead Bug', sets: 3, reps: '10 each', rest: '30s', muscles: 'Deep Core' },
         { name: 'Glute Bridge', sets: 3, reps: '15', rest: '45s', muscles: 'Glutes' },
       ]},
-      { day: 'Day 4 — Upper Body', exercises: [
+      { day: 'Day 4 - Upper Body', exercises: [
         { name: 'Dumbbell Overhead Press', sets: 3, reps: '10-12', rest: '60s', muscles: 'Shoulders' },
         { name: 'Dumbbell Row', sets: 3, reps: '10 each', rest: '60s', muscles: 'Back' },
       ]},
-      { day: 'Day 5 — HIIT', exercises: [
-        { name: 'Jumping Jacks', sets: 3, reps: '45s on / 15s off', rest: '—', muscles: 'Full Body' },
-        { name: 'Mountain Climbers', sets: 3, reps: '40s on / 20s off', rest: '—', muscles: 'Core' },
+      { day: 'Day 5 - HIIT', exercises: [
+        { name: 'Jumping Jacks', sets: 3, reps: '45s on / 15s off', rest: '-', muscles: 'Full Body' },
+        { name: 'Mountain Climbers', sets: 3, reps: '40s on / 20s off', rest: '-', muscles: 'Core' },
       ]},
-      { day: 'Day 6 — Yoga', exercises: [
-        { name: 'Sun Salutation', sets: 3, reps: '5 rounds', rest: '—', muscles: 'Full Body' },
+      { day: 'Day 6 - Yoga', exercises: [
+        { name: 'Sun Salutation', sets: 3, reps: '5 rounds', rest: '-', muscles: 'Full Body' },
       ]},
-      { day: 'Day 7 — Rest', exercises: [
-        { name: '30-min walk', sets: 1, reps: '30 min', rest: '—', muscles: 'Recovery' },
+      { day: 'Day 7 - Rest', exercises: [
+        { name: '30-min walk', sets: 1, reps: '30 min', rest: '-', muscles: 'Recovery' },
       ]},
     ],
     nutrition: ['Eat whole foods 80% of the time', 'Drink at least 2L water', 'Sleep 7-8 hours', 'Include fruits and vegetables daily'],
@@ -201,7 +201,7 @@ const Workouts = () => {
     fetchHistory();
   };
 
-  // The plan to display — either a history plan, the current AI plan, or the static fallback
+  // The plan to display - either a history plan, the current AI plan, or the static fallback
   const displayPlan = viewingHistoryPlan || currentPlan || STATIC_PLANS[goalKey] || STATIC_PLANS.general;
   const isStaticFallback = !viewingHistoryPlan && !currentPlan;
 
@@ -336,7 +336,7 @@ const Workouts = () => {
           >
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accent-neon/10 border border-accent-neon/20 text-xs font-medium text-accent-neon">
               <Zap size={10} />
-              AI Generated — v{planMeta.version}
+              AI Generated - v{planMeta.version}
             </span>
             {planMeta.createdAt && (
               <span className="text-xs text-muted flex items-center gap-1">

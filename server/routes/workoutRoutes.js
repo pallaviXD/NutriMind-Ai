@@ -58,11 +58,11 @@ router.post('/workout-plan', async (req, res) => {
     ? JSON.parse(profile.health_conditions) : [];
 
   const goalDescriptions = {
-    gym:         'Hypertrophy / muscle building — progressive overload, push-pull-legs or upper-lower split',
-    weight_loss: 'Fat loss — HIIT, calorie-burning circuits, strength to preserve lean mass',
-    diabetes:    'Diabetic-friendly — low impact, post-meal walks, resistance bands, blood sugar management',
-    heart:       'Cardiac health — Zone 2 cardio, low-intensity steady state, light resistance, breathing exercises',
-    general:     'General wellness — balanced full body, cardio, flexibility, active recovery',
+    gym:         'Hypertrophy / muscle building - progressive overload, push-pull-legs or upper-lower split',
+    weight_loss: 'Fat loss - HIIT, calorie-burning circuits, strength to preserve lean mass',
+    diabetes:    'Diabetic-friendly - low impact, post-meal walks, resistance bands, blood sugar management',
+    heart:       'Cardiac health - Zone 2 cardio, low-intensity steady state, light resistance, breathing exercises',
+    general:     'General wellness - balanced full body, cardio, flexibility, active recovery',
   };
 
   const prompt = `You are an expert certified personal trainer and exercise physiologist.
@@ -72,7 +72,7 @@ Create a complete, personalized 7-day workout plan for:
 - Age: ${age} years, Gender: ${profile.gender || 'not specified'}
 - Height: ${profile.height_cm}cm, Weight: ${profile.weight_kg}kg
 - Activity Level: ${profile.activity_level || 'moderate'}
-- Health Goal: ${effectiveGoal} — ${goalDescriptions[effectiveGoal] || goalDescriptions.general}
+- Health Goal: ${effectiveGoal} - ${goalDescriptions[effectiveGoal] || goalDescriptions.general}
 - Health Conditions: ${conditions.length ? conditions.join(', ') : 'none'}
 
 Respond ONLY with valid JSON:
@@ -80,7 +80,7 @@ Respond ONLY with valid JSON:
   "title": "Plan Title",
   "subtitle": "Short subtitle",
   "days": [
-    { "day": "Day 1 — Focus", "exercises": [{ "name": "Exercise", "sets": 3, "reps": "8-10", "rest": "60s", "muscles": "Target" }] }
+    { "day": "Day 1 - Focus", "exercises": [{ "name": "Exercise", "sets": 3, "reps": "8-10", "rest": "60s", "muscles": "Target" }] }
   ],
   "nutrition": ["tip1","tip2","tip3","tip4"]
 }

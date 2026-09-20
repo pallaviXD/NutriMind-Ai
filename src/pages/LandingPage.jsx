@@ -14,7 +14,7 @@ const FEATURES = [
   {
     icon: <MessageSquare size={22} />,
     title: 'AI Chat Coach',
-    desc: 'Log meals in plain English. "I had idli sambar for breakfast" — AI parses, estimates calories, and updates your dashboard instantly.',
+    desc: 'Log meals in plain English. "I had idli sambar for breakfast" - AI parses, estimates calories, and updates your dashboard instantly.',
     color: 'from-sky-500/20 to-sky-500/5',
     border: 'border-sky-500/30',
     accent: 'text-sky-400',
@@ -30,7 +30,7 @@ const FEATURES = [
   {
     icon: <BarChart3 size={22} />,
     title: 'Real Analytics',
-    desc: 'Charts powered by your actual data — calorie trends, macro breakdowns, weight history, and logging streak. No fake placeholder numbers.',
+    desc: 'Charts powered by your actual data - calorie trends, macro breakdowns, weight history, and logging streak. No fake placeholder numbers.',
     color: 'from-emerald-500/20 to-emerald-500/5',
     border: 'border-emerald-500/30',
     accent: 'text-emerald-400',
@@ -38,7 +38,7 @@ const FEATURES = [
   {
     icon: <Brain size={22} />,
     title: 'Health Intelligence',
-    desc: 'Set your conditions — diabetes, cardiac, PCOS, thyroid. AI adapts every suggestion, flags risky foods, and gives condition-specific advice.',
+    desc: 'Set your conditions - diabetes, cardiac, PCOS, thyroid. AI adapts every suggestion, flags risky foods, and gives condition-specific advice.',
     color: 'from-pink-500/20 to-pink-500/5',
     border: 'border-pink-500/30',
     accent: 'text-pink-400',
@@ -54,7 +54,7 @@ const FEATURES = [
   {
     icon: <Droplets size={22} />,
     title: 'Full Tracking Suite',
-    desc: 'Weight logs with trend charts, water intake tracker, BMI/BMR/TDEE calculator, and ideal weight range — all from your profile.',
+    desc: 'Weight logs with trend charts, water intake tracker, BMI/BMR/TDEE calculator, and ideal weight range - all from your profile.',
     color: 'from-cyan-500/20 to-cyan-500/5',
     border: 'border-cyan-500/30',
     accent: 'text-cyan-400',
@@ -71,9 +71,9 @@ const GOALS = [
 
 const CHAT_DEMO = [
   { role: 'user', text: 'I had 2 rotis with dal and a glass of buttermilk for lunch' },
-  { role: 'ai',  text: '✅ Logged **Roti + Dal + Buttermilk** → ~**485 kcal** added to Lunch\n\n• Protein: +18g  • Carbs: +72g  • Fat: +9g\n\n**1,215 / 2,000 kcal** consumed today. You\'re on track — great balanced meal! 💪' },
+  { role: 'ai',  text: '✅ Logged **Roti + Dal + Buttermilk** → ~**485 kcal** added to Lunch\n\n• Protein: +18g  • Carbs: +72g  • Fat: +9g\n\n**1,215 / 2,000 kcal** consumed today. You\'re on track - great balanced meal! 💪' },
   { role: 'user', text: 'What should I have for dinner given I want to hit my protein goal?' },
-  { role: 'ai',  text: '🎯 You need **~52g more protein** tonight. I\'d suggest:\n\n• **Grilled chicken breast** (200g) — 46g protein, 330 kcal\n• Pair with **steamed broccoli + brown rice** for complete macros\n\nWant me to generate a full recipe from your pantry? 🍽️' },
+  { role: 'ai',  text: '🎯 You need **~52g more protein** tonight. I\'d suggest:\n\n• **Grilled chicken breast** (200g) - 46g protein, 330 kcal\n• Pair with **steamed broccoli + brown rice** for complete macros\n\nWant me to generate a full recipe from your pantry? 🍽️' },
 ];
 
 const STATS = [
@@ -197,7 +197,7 @@ const LandingPage = () => {
             className="text-lg md:text-xl text-muted max-w-2xl mx-auto mb-10 leading-relaxed"
           >
             Log meals in plain language, get AI-generated recipes from your pantry,
-            track real nutrition data, and receive personalized health advice — all
+            track real nutrition data, and receive personalized health advice - all
             tuned to your body and health conditions.
           </motion.p>
 
@@ -316,9 +316,9 @@ const LandingPage = () => {
             >
               {[
                 { n: '01', title: 'Set up your profile', desc: 'Enter height, weight, age, activity level, and health conditions. Takes 60 seconds.' },
-                { n: '02', title: 'Chat naturally',       desc: 'Tell the AI what you ate, ask for recipes, request health advice — in any language.' },
+                { n: '02', title: 'Chat naturally',       desc: 'Tell the AI what you ate, ask for recipes, request health advice - in any language.' },
                 { n: '03', title: 'Watch your dashboard update', desc: 'Calories, macros, meal cards, and insights update in real time as you chat.' },
-                { n: '04', title: 'Track your progress',  desc: 'Analytics show real trends from your data. Weight, streaks, macro history — all yours.' },
+                { n: '04', title: 'Track your progress',  desc: 'Analytics show real trends from your data. Weight, streaks, macro history - all yours.' },
               ].map((step, i) => (
                 <motion.div
                   key={step.n}
@@ -355,7 +355,7 @@ const LandingPage = () => {
               <Sparkles size={11} /> Everything you need
             </div>
             <h2 className="text-3xl md:text-5xl font-black mb-4">One platform, total health clarity</h2>
-            <p className="text-muted max-w-xl mx-auto">Every feature is connected — AI chat updates your analytics, your profile shapes AI responses, your pantry drives your recipes.</p>
+            <p className="text-muted max-w-xl mx-auto">Every feature is connected - AI chat updates your analytics, your profile shapes AI responses, your pantry drives your recipes.</p>
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -392,7 +392,7 @@ const LandingPage = () => {
               <Heart size={11} /> Built for your condition
             </div>
             <h2 className="text-3xl md:text-5xl font-black mb-4">Not a generic calorie counter</h2>
-            <p className="text-muted max-w-xl mx-auto">NutriMind adapts entirely to your health goal — different calorie targets, macro ratios, food restrictions, and AI guidance for each.</p>
+            <p className="text-muted max-w-xl mx-auto">NutriMind adapts entirely to your health goal - different calorie targets, macro ratios, food restrictions, and AI guidance for each.</p>
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -469,7 +469,7 @@ const LandingPage = () => {
           <div className="flex items-center gap-2">
             <Activity size={16} className="text-accent-neon" />
             <span className="font-bold text-foreground">NutriMind OS</span>
-            <span>— AI-Powered Health Intelligence</span>
+            <span>- AI-Powered Health Intelligence</span>
           </div>
           <div className="flex items-center gap-6">
             <Link to="/login"  className="hover:text-foreground transition-colors">Sign In</Link>
