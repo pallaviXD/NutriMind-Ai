@@ -101,7 +101,7 @@ const NavBar = () => {
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Activity size={24} className="text-accent-neon" />
-          <span className="text-xl font-bold">NutriMind <span className="text-accent-purple">OS</span></span>
+          <span className="text-xl font-bold">NutriMind <span className="text-accent-purple">AI</span></span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm text-muted">
           <a href="#features" className="hover:text-foreground transition-colors">Features</a>
@@ -186,7 +186,7 @@ const LandingPage = () => {
             Your Personal
             <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-accent-neon via-accent-purple to-pink-400">
-              AI Health OS
+              AI Health Intelligence
             </span>
           </motion.h1>
 
@@ -468,7 +468,7 @@ const LandingPage = () => {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted">
           <div className="flex items-center gap-2">
             <Activity size={16} className="text-accent-neon" />
-            <span className="font-bold text-foreground">NutriMind OS</span>
+            <span className="font-bold text-foreground">NutriMind AI</span>
             <span>- AI-Powered Health Intelligence</span>
           </div>
           <div className="flex items-center gap-6">

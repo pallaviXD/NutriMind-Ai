@@ -1,4 +1,4 @@
-// NutriMind OS - AI Service (calls backend /api/user/chat → Groq Llama 3.3 70B)
+// NutriMind AI - AI Service (calls backend /api/user/chat → Groq Llama 3.3 70B)
 
 export const simulateLocalAI = async (input, context) => {
   const token = localStorage.getItem('nm_token');

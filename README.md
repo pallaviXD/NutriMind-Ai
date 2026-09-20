@@ -1,8 +1,8 @@
-# NutriMind OS 🧬
+# NutriMind AI 🧬
 
 > AI-powered personal health intelligence platform - full-stack React + Node.js + Groq Llama 3.3 70B.
 
-NutriMind OS is your personal AI health coach. Log meals through natural conversation, get AI-generated recipes from your pantry, track macros and calories in real time, and receive personalized nutrition advice based on your body, health conditions, and goals.
+NutriMind AI is your personal AI health coach. Log meals through natural conversation, get AI-generated recipes from your pantry, track macros and calories in real time, and receive personalized nutrition advice based on your body, health conditions, and goals.
 
 ---
 

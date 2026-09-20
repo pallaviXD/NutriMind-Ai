@@ -70,7 +70,7 @@ const LoginPage = () => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-3">
             <Activity size={36} className="text-accent-neon" />
-            <span className="text-3xl font-bold">Nutri<span className="text-accent-purple">Mind</span> <span className="text-muted font-light text-xl">OS</span></span>
+            <span className="text-3xl font-bold">Nutri<span className="text-accent-purple">Mind</span> <span className="text-muted font-light text-xl">AI</span></span>
           </div>
           <p className="text-muted text-sm">Your AI Health Intelligence Platform</p>
         </div>

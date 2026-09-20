@@ -1,8 +1,8 @@
-# NutriMind OS - Complete Technical Deep Dive
+# NutriMind AI - Complete Technical Deep Dive
 
 ## Project Overview
 
-**NutriMind OS** is a full-stack AI-powered health intelligence platform that acts as a personal nutrition coach. It's essentially a conversational interface to track your diet, generate recipes, and get personalized health advice - all powered by a large language model (Llama 3.3 70B).
+**NutriMind AI** is a full-stack AI-powered health intelligence platform that acts as a personal nutrition coach. It's essentially a conversational interface to track your diet, generate recipes, and get personalized health advice - all powered by a large language model (Llama 3.3 70B).
 
 **What problem does it solve?**
 - Traditional calorie trackers require manual entry of every food item, searching databases, and estimating portions
@@ -377,7 +377,7 @@ Backend: /api/user/chat handler
 
 ### System Prompt Construction
 ```javascript
-const systemPrompt = `You are NutriMind OS, an AI health coach for ${user.name}.
+const systemPrompt = `You are NutriMind AI, an AI health coach for ${user.name}.
 
 USER PROFILE: Weight 70kg, Height 175cm, Gender male, Age 25, Activity moderate
 HEALTH GOAL: gym (prioritize protein timing, muscle recovery, caloric surplus)
@@ -884,7 +884,7 @@ export const GlobalProvider = ({ children }) => {
   });
   const [pantry, setPantry] = useState(['Chicken', 'Rice', 'Eggs', ...]);
   const [chatHistory, setChatHistory] = useState([
-    { role: 'ai', text: '👋 NutriMind OS online! ...' }
+    { role: 'ai', text: '👋 NutriMind AI online! ...' }
   ]);
   const [healthProfile, setHealthProfile] = useState(null);
 
@@ -1044,7 +1044,7 @@ Request completes
 
 ### "Walk me through your project"
 **Answer template:**
-"NutriMind OS is a full-stack AI health coach I built using React, Node.js, and Llama 3.3 70B. The key differentiator is the conversational interface - instead of manually searching for foods and entering calories, you just tell it what you ate in plain language, and the AI parses it, estimates macros, and updates your dashboard in real time.
+"NutriMind AI is a full-stack AI health coach I built using React, Node.js, and Llama 3.3 70B. The key differentiator is the conversational interface - instead of manually searching for foods and entering calories, you just tell it what you ate in plain language, and the AI parses it, estimates macros, and updates your dashboard in real time.
 
 On the backend, I'm using Express with Turso, a cloud SQLite database. Authentication is JWT-based with bcryptjs for password hashing. The AI runs entirely server-side through Groq's API - I built retry logic with exponential backoff for reliability, and a JSON repair system to handle malformed LLM outputs.
 

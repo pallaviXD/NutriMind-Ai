@@ -36,7 +36,7 @@ const VerifyEmailPage = () => {
       >
         <div className="flex items-center justify-center gap-2 mb-8">
           <Activity size={28} className="text-accent-neon" />
-          <span className="text-xl font-bold">NutriMind <span className="text-accent-purple">OS</span></span>
+          <span className="text-xl font-bold">NutriMind <span className="text-accent-purple">AI</span></span>
         </div>
 
         {status === 'loading' && (

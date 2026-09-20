@@ -45,7 +45,7 @@ export const GlobalProvider = ({ children }) => {
   const [chatHistory, setChatHistory] = useState([
     {
       role: 'ai',
-      text: '👋 NutriMind OS online! I can log your meals, suggest recipes from your pantry, help you stay motivated, or answer health questions. Try: "I ate 200g of chicken" or "What should I cook tonight?"'
+      text: '👋 NutriMind AI online! I can log your meals, suggest recipes from your pantry, help you stay motivated, or answer health questions. Try: "I ate 200g of chicken" or "What should I cook tonight?"'
     }
   ]);
 

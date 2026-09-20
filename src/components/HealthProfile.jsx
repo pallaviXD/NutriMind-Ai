@@ -146,7 +146,17 @@ const HealthProfile = () => {
               {/* DOB */}
               <div className="col-span-2">
                 <label className="text-xs text-muted uppercase tracking-wider font-semibold block mb-2">Date of Birth {age && <span className="text-accent-neon normal-case">({age} years old)</span>}</label>
-                <input type="date" value={details.date_of_birth} onChange={e => set('date_of_birth', e.target.value)}
+                <input type="date" value={details.date_of_birth}
+                  onChange={e => {
+                    const val = e.target.value;
+                    const selected = new Date(val);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (val && selected > today) return; // block future dates
+                    set('date_of_birth', val);
+                  }}
+                  min="1900-01-01"
+                  max={new Date().toISOString().split('T')[0]}
                   className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent-neon/60 transition-all" />
               </div>
               {/* Height */}

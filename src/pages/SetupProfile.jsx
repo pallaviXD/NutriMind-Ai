@@ -63,7 +63,7 @@ const SetupProfile = () => {
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg relative z-10">
         <div className="flex items-center justify-center gap-2 mb-6">
           <Activity size={30} className="text-accent-neon" />
-          <span className="text-2xl font-bold">NutriMind <span className="text-accent-purple">OS</span></span>
+          <span className="text-2xl font-bold">NutriMind <span className="text-accent-purple">AI</span></span>
         </div>
 
         {/* Step dots */}
@@ -110,8 +110,17 @@ const SetupProfile = () => {
                 {/* DOB */}
                 <div>
                   <label className="text-xs font-semibold text-muted uppercase tracking-wider block mb-2">Date of Birth</label>
-                  <input type="date" value={data.date_of_birth} onChange={e => set('date_of_birth', e.target.value)}
-                    max={new Date(Date.now() - 10 * 365.25 * 24 * 3600 * 1000).toISOString().split('T')[0]}
+                  <input type="date" value={data.date_of_birth}
+                    onChange={e => {
+                      const val = e.target.value;
+                      const selected = new Date(val);
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      if (val && selected > today) return; // block future dates
+                      set('date_of_birth', val);
+                    }}
+                    min="1900-01-01"
+                    max={new Date().toISOString().split('T')[0]}
                     className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-accent-neon/60 focus:ring-1 focus:ring-accent-neon/30 transition-all"
                   />
                 </div>
